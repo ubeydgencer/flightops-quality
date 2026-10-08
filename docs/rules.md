@@ -1,4 +1,4 @@
-# Rule catalog — 0.1.0
+# Rule catalog — 0.1.1
 
 Errors quarantine a row. Warnings retain an incomplete observation without
 inventing its missing values. Info findings audit exact repeats. Adapter findings
@@ -37,7 +37,10 @@ taxi or turnaround duration is imposed. Such thresholds need consumer context.
 
 Canonical `source + record_id` comes from the caller. The default BTS identity
 is a JSON tuple of flight date, operating/reporting carrier ID (fallback code),
-flight number, origin/destination airport IDs (fallback codes), and raw scheduled
-departure clock. It is an adapter policy, not a universal flight identifier.
+flight number, origin/destination airport IDs (fallback codes), and normalized
+scheduled departure minute. Integral numeric forms such as `800`, `0800`, `800.0`
+share an identity; different raw payloads therefore enter conflict quarantine.
+`2400` and `0000` also share a clock identity when `midnight_policy="start"`.
+It is an adapter policy, not a universal flight identifier.
 An explicit `record_id` overrides it. Identity decisions and raw encodings should
 be consistent across one batch; normalization context is not a revision resolver.

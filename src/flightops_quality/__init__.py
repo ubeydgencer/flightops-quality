@@ -1,5 +1,5 @@
 """Explainable quality checks for flight operations data."""
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from .batch import analyze_records, analyze_results
 from .models import BatchReport, FlightLeg, Issue, RecordResult, TimestampResult

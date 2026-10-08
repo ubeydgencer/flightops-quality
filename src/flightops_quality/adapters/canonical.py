@@ -1,11 +1,11 @@
 """Normalize a documented ISO mapping; preserve every raw source field."""
 from __future__ import annotations
 
-import json
 import re
 from datetime import date
 from typing import Mapping
 
+from .._raw import snapshot_raw
 from ..models import FlightLeg, Issue, RecordResult
 from ..rules import validate_leg
 from ..time import resolve_timestamp
@@ -17,13 +17,8 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 def normalize_record(row: Mapping, *, row_number: int = 1) -> RecordResult:
     if not isinstance(row, Mapping):
         raise ValueError("Canonical input must be a JSON-compatible mapping")
-    raw = dict(row)
-    if any(not isinstance(key, str) for key in raw):
-        raise ValueError("Raw input must have string keys")
-    try:
-        json.dumps(raw, allow_nan=False)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("Raw input must contain finite JSON-compatible values") from exc
+    raw = snapshot_raw(row)
+    row = raw
     issues = []
     values = {}
     for name in REQUIRED:

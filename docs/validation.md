@@ -1,6 +1,29 @@
-# v0.1.0 validation — 9 October 2026
+# Versioned validation — 9 October 2026
 
-## Completed local checks
+## v0.1.1 security and correctness patch
+
+- **52 unittest cases passed** on CPython 3.9.6 and 3.12.14.
+- Three agents independently reviewed security, parsing/lineage and domain/docs.
+  Reproduced findings were fixed and rechecked: invalid ISO offset normalization,
+  equivalent numeric BTS identities, extreme Decimal exponents, nested JSON keys,
+  lone surrogates, mutable input snapshots and blank-line source positions.
+- CLI byte/record/cell/column limits, duplicate timezone keys, deep/cyclic API
+  input and crafted HTML row numbers have regression coverage.
+- Ruff passed. Bandit 1.9.4 reported **no findings** in `src` and `examples`.
+- pip-audit 2.10.1 found no known advisories in the audited development tools
+  after the project-local pip was upgraded to 26.2.1. The unpublished local project
+  itself was skipped by the advisory service; it has zero mandatory runtime
+  dependencies. This is not a vulnerability-free certification.
+- README API code and local documentation links were verified. The local SVG
+  banner was checked as XML. Private vulnerability reporting is enabled on GitHub.
+
+The release additionally checks distribution metadata, fresh-wheel installation,
+CLI examples and artifact hashes. Source archive/wheel content is compared with
+the published source; text line endings may be normalized by Git.
+
+## v0.1.0 initial snapshot
+
+### Completed local checks
 
 - **38 unittest cases passed** on CPython 3.9.6 and 3.12.14 (macOS).
 - `ruff check .` passed with the configured correctness rules.

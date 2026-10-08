@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from flightops_quality.adapters.bts import normalize_bts_row, parse_bts_clock
 from flightops_quality.rules import flight_metrics
+from flightops_quality.batch import analyze_results
 
 ZONES = {"JFK": "America/New_York", "LAX": "America/Los_Angeles"}
 
@@ -107,6 +108,19 @@ class BtsTests(unittest.TestCase):
                 self.assertTrue(result.accepted, result.issues)
                 local = result.flight.sobt.astimezone(ZoneInfo("America/New_York"))
                 self.assertEqual(local.date().isoformat(), expected_date)
+
+    def test_equivalent_numeric_identity_encodings_do_not_double_count(self):
+        baseline = {**bts_row(), "DOT_ID_Reporting_Airline": "123", "OriginAirportID": "12478",
+                    "DestAirportID": "12892"}
+        encoded = {**baseline, "CRSDepTime": "2300.0", "DOT_ID_Reporting_Airline": "123.0",
+                   "OriginAirportID": "12478.0", "DestAirportID": "012892",
+                   "Flight_Number_Reporting_Airline": "001.0"}
+        records = [normalize_bts_row(row, ZONES) for row in (baseline, encoded)]
+        self.assertTrue(all(record.accepted for record in records))
+        self.assertEqual(records[0].flight.record_id, records[1].flight.record_id)
+        report = analyze_results(records)
+        # Raw payloads differ, so conservative policy quarantines the whole group.
+        self.assertEqual(report.counts, {"input": 2, "accepted": 0, "quarantined": 2, "duplicates": 0})
 
 
 if __name__ == "__main__":

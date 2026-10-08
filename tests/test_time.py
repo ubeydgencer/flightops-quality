@@ -41,6 +41,13 @@ class TimeTests(unittest.TestCase):
         self.assertEqual(resolve_timestamp("2026-10-09T09:00", "UTC", 2).issues[0].code, "TIME_FOLD_INVALID")
         self.assertEqual(resolve_timestamp("2026-10-09T09:00", "UTC", 1.0).issues[0].code, "TIME_FOLD_INVALID")
 
+    def test_invalid_offset_minutes_are_not_normalized_by_python(self):
+        for offset in ("+00:60", "+01:99", "-00:60", "+24:00"):
+            with self.subTest(offset=offset):
+                result = resolve_timestamp("2026-01-01T12:00:00" + offset)
+                self.assertIsNone(result.value)
+                self.assertEqual(result.issues[0].code, "TIME_INVALID")
+
 
 if __name__ == "__main__":
     unittest.main()

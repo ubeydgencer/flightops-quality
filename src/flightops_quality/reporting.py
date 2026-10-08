@@ -7,11 +7,12 @@ from html import escape
 from typing import Any, Mapping, Optional
 
 from . import __version__
+from ._raw import snapshot_raw
 from .analytics import summarize
 from .models import BatchReport
 from .rules import flight_metrics
 
-RULESET_VERSION = "0.1.0"
+RULESET_VERSION = "0.1.1"
 
 
 def audit_document(report: BatchReport, manifest: Optional[Mapping[str, Any]] = None) -> dict:
@@ -22,7 +23,8 @@ def audit_document(report: BatchReport, manifest: Optional[Mapping[str, Any]] = 
     document["summary"] = summarize(report)
     for category in ("accepted", "quarantined", "duplicates"):
         for entry, record in zip(document[category], getattr(report, category)):
-            payload = json.dumps(dict(record.raw), sort_keys=True, ensure_ascii=False,
+            entry["raw"] = snapshot_raw(record.raw)
+            payload = json.dumps(entry["raw"], sort_keys=True, ensure_ascii=False,
                                  separators=(",", ":"), allow_nan=False).encode("utf-8")
             entry["raw_sha256"] = hashlib.sha256(payload).hexdigest()
             entry["metrics"] = flight_metrics(record.flight) if record.accepted else None
@@ -42,7 +44,7 @@ def render_html(document: Mapping[str, Any]) -> str:
             ) or "No findings"
             raw = json.dumps(entry["raw"], ensure_ascii=False, sort_keys=True)
             rows.append(
-                f'<tr><td>{escape(category)}</td><td>{entry["row_number"]}</td>'
+                f'<tr><td>{escape(category)}</td><td>{escape(str(entry["row_number"]))}</td>'
                 f'<td>{escape(identity)}</td><td><pre>{escape(findings)}</pre>'
                 f'<details><summary>Raw record</summary><pre>{escape(raw)}</pre></details></td></tr>'
             )

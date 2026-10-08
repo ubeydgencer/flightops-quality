@@ -6,6 +6,7 @@ from collections import defaultdict
 from dataclasses import replace
 from typing import Iterable, Mapping, Optional, Tuple
 
+from ._raw import snapshot_raw
 from .adapters.canonical import normalize_record
 from .models import BatchReport, Issue, RecordResult
 
@@ -20,7 +21,7 @@ def _identity(record: RecordResult) -> Optional[Tuple[str, str]]:
 
 
 def analyze_results(records: Iterable[RecordResult]) -> BatchReport:
-    records = tuple(records)
+    records = tuple(replace(record, raw=snapshot_raw(record.raw)) for record in records)
     groups = defaultdict(list)
     payloads = []
     for index, record in enumerate(records):

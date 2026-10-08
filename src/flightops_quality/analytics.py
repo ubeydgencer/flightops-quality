@@ -16,7 +16,8 @@ def summarize(report: BatchReport) -> dict[str, Any]:
         issues.update(issue.code for issue in result.issues)
     for result in report.accepted:
         leg = result.flight
-        assert leg is not None
+        if leg is None:
+            raise ValueError("Accepted records must contain a normalized flight")
         cancelled += int(leg.cancelled)
         diverted += int(leg.diverted)
         if leg.cancelled or leg.diverted:

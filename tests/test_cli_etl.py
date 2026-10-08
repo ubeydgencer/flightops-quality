@@ -52,7 +52,7 @@ class PipelineTests(unittest.TestCase):
     def test_python_module_entry_point(self):
         run = subprocess.run([sys.executable, "-m", "flightops_quality", "--version"],
                              capture_output=True, text=True, check=True)
-        self.assertEqual(run.stdout.strip(), "0.1.0")
+        self.assertEqual(run.stdout.strip(), "0.1.1")
 
     def test_malformed_csv_produces_no_partial_audit(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -93,6 +93,22 @@ class PipelineTests(unittest.TestCase):
             main([str(source), "--output", str(output)])
             audit = json.loads((output / "audit.json").read_text())
             self.assertEqual([r["row_number"] for r in audit["accepted"]], [2, 4])
+
+    def test_blank_lines_do_not_shift_source_lineage(self):
+        import csv
+        from test_canonical import valid_row
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "blank-lines.csv"
+            row = valid_row()
+            with source.open("w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=list(row))
+                writer.writeheader()
+                handle.write("\n")
+                writer.writerow(row)
+            output = Path(folder) / "audit"
+            main([str(source), "--output", str(output)])
+            audit = json.loads((output / "audit.json").read_text())
+            self.assertEqual(audit["accepted"][0]["row_number"], 3)
 
 
 if __name__ == "__main__":

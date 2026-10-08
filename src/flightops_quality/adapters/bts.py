@@ -1,7 +1,7 @@
 """Bounded BTS Reporting Carrier adapter with explicit timestamp derivation.
 
 Identity policy: JSON tuple of FlightDate, operating/reporting carrier ID (or code),
-flight number, origin/destination AirportID (or code), and the raw CRSDepTime.
+flight number, origin/destination AirportID (or code), and normalized CRSDepTime.
 Tail number is deliberately not part of identity. Scheduled departure 2400 needs
 an explicit start/end-of-FlightDate policy; other clocks are comparisons, not date
 anchors. Validate the policy against the dated provider release used.
@@ -11,10 +11,11 @@ from __future__ import annotations
 import json
 import re
 from datetime import date, datetime, timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, DecimalException
 from typing import Mapping, Optional
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from .._raw import snapshot_raw
 from ..models import FlightLeg, Issue, RecordResult
 from ..rules import validate_leg
 from ..time import resolve_timestamp
@@ -32,11 +33,11 @@ def _integer(value) -> int:
         raise ValueError("Expected a whole finite number")
     try:
         number = Decimal(str(value).strip())
-    except InvalidOperation as exc:
+        if not number.is_finite() or number.copy_abs() > 10**10 or number != number.to_integral_value():
+            raise ValueError("Expected a bounded whole finite number")
+        return int(number)
+    except (DecimalException, OverflowError) as exc:
         raise ValueError("Expected a whole finite number") from exc
-    if not number.is_finite() or number != number.to_integral_value() or abs(number) > 10**10:
-        raise ValueError("Expected a bounded whole finite number")
-    return int(number)
 
 
 def parse_bts_clock(value) -> Optional[int]:
@@ -59,13 +60,8 @@ def normalize_bts_row(row: Mapping, airport_timezones: Mapping[str, str], *,
         raise ValueError("midnight_policy must be None, 'start', or 'end'")
     if not isinstance(row, Mapping) or not isinstance(airport_timezones, Mapping):
         raise ValueError("BTS row and airport timezones must be mappings")
-    raw = dict(row)
-    if any(not isinstance(key, str) for key in raw):
-        raise ValueError("Raw input must have string keys")
-    try:
-        json.dumps(raw, allow_nan=False)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("Raw input must contain finite JSON-compatible values") from exc
+    raw = snapshot_raw(row)
+    row = raw
     issues = []
 
     def finding(code, severity, fields, message):
@@ -100,9 +96,35 @@ def normalize_bts_row(row: Mapping, airport_timezones: Mapping[str, str], *,
             finding("FIELD_REQUIRED", "error", (field,), "Required flight identity field is missing.")
     if _blank(row.get("CRSDepTime")):
         finding("FIELD_REQUIRED", "error", ("CRSDepTime",), "Scheduled departure clock is required for BTS identity and date anchoring.")
+    # BTS numeric identity fields are integral even when a CSV export writes
+    # 800.0 or leading zeroes. Equivalent encodings must share one identity.
+    def numeric_identity(value, field):
+        try:
+            result = _integer(value)
+            if result < 0:
+                raise ValueError
+            return str(result)
+        except ValueError:
+            finding("FIELD_INVALID", "error", (field,), "BTS numeric identity field must be a nonnegative finite integer.")
+            return value
+
+    number = numeric_identity(number, "Flight_Number") if number else number
+    if first("DOT_ID_Operating_Airline", "DOT_ID_Reporting_Airline"):
+        carrier_id = numeric_identity(carrier_id, "DOT_ID_Carrier")
+    origin_id, destination_id = first("OriginAirportID"), first("DestAirportID")
+    if origin_id:
+        origin_id = numeric_identity(origin_id, "OriginAirportID")
+    if destination_id:
+        destination_id = numeric_identity(destination_id, "DestAirportID")
+    try:
+        identity_clock = parse_bts_clock(row.get("CRSDepTime"))
+        if identity_clock == 1440 and midnight_policy == "start":
+            identity_clock = 0
+    except ValueError:
+        identity_clock = first("CRSDepTime")  # Invalid clocks still get their error below.
     if record_id is None:
-        record_id = json.dumps([day, carrier_id, number, first("OriginAirportID") or origin,
-                                first("DestAirportID") or destination, first("CRSDepTime")], separators=(",", ":"))
+        record_id = json.dumps([day, carrier_id, number, origin_id or origin,
+                                destination_id or destination, identity_clock], separators=(",", ":"))
     elif not isinstance(record_id, str) or not record_id.strip():
         finding("FIELD_REQUIRED", "error", ("record_id",), "Caller record_id must be a nonempty string.")
     if service_date is None or any(i.severity == "error" for i in issues):

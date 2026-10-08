@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">FlightOps Quality</title>
+  <desc id="desc">Explainable data quality for civil aviation ETL. A flight path connects raw records to trusted analytics.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#081322"/><stop offset="1" stop-color="#153348"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#c1e5f0" stroke-opacity=".08"/></pattern>
+  </defs>
+  <rect width="1200" height="320" rx="20" fill="url(#bg)"/>
+  <rect width="1200" height="320" rx="20" fill="url(#grid)"/>
+  <text x="65" y="78" fill="#64e6c2" font-family="Arial, sans-serif" font-size="16" letter-spacing="4">CIVIL AVIATION · DATA ENGINEERING</text>
+  <text x="60" y="148" fill="#f3f8fc" font-family="Arial, sans-serif" font-size="57" font-weight="700">FlightOps Quality</text>
+  <text x="64" y="190" fill="#b9cedc" font-family="Arial, sans-serif" font-size="22">Every timestamp explained. Every record accounted for.</text>
+  <path d="M70 252H370Q450 252 482 224T590 206H1020" stroke="#64e6c2" stroke-width="3" fill="none" stroke-dasharray="7 7"/>
+  <g fill="#64e6c2"><circle cx="70" cy="252" r="6"/><circle cx="370" cy="252" r="6"/><circle cx="590" cy="206" r="6"/></g>
+  <path d="M1042 201l-26-12-3 4 16 13-16 14 3 4 26-12 16 2 5-8-5-7z" fill="#f3f8fc"/>
+  <text x="66" y="291" fill="#8aafc2" font-family="Arial, sans-serif" font-size="13">RAW</text>
+  <text x="338" y="291" fill="#8aafc2" font-family="Arial, sans-serif" font-size="13">VALIDATE</text>
+  <text x="563" y="248" fill="#8aafc2" font-family="Arial, sans-serif" font-size="13">ANALYZE</text>
+</svg>
