@@ -1,0 +1,56 @@
+# Design and bounded roadmap
+
+## Data flow
+
+```text
+raw CSV + caller timezone map
+    -> source adapter -> UTC FlightLeg + findings + provenance
+    -> identity groups -> accepted / quarantined / exact repeats
+    -> audit JSON + HTML + JSONL -> example SQLite warehouse -> explicit-cohort SQL
+```
+
+No provider fetches, credentials or network access are built into the core.
+Adapters retain every original field; a rejected row remains inspectable.
+Identity and timestamp policies are deliberately conservative.
+
+The CLI manifest records file and timezone-map hashes, format and timezone
+environment. Each row has its original CSV row number, raw payload hash,
+normalized values, findings and derivation input field names. Package and
+ruleset versions are recorded at the document level. Reproduction also requires
+pinning the Python/OS timezone database; the manifest cannot identify an OS
+database version portably and does not pretend otherwise.
+API callers should put their source URL, timezone-map hash, `midnight_policy`
+and any per-record fold choices in the optional `audit_document(..., manifest=...)`
+context. The adapter's provenance lists derivation inputs; it is not a complete
+environment snapshot by itself.
+
+## Decisions
+
+- Standard-library core keeps integration small. SQLite is the runnable warehouse
+  example; Parquet and DuckDB adapters can be added after the API is stable.
+- UTC timestamps are separate from the service date. A delayed flight does not
+  become a different scheduled service when it departs the next day.
+- Derive dates from durations/delays rather than guessing a day from clock order.
+- Require caller choice for the scheduled `2400` date anchor; retain that choice
+  in the CLI manifest. The BTS directive defines the clock encoding, but this
+  alpha does not assume an unvalidated source-release service-date convention.
+- Distinguish missing/ambiguous data from values that fail a rule. Warnings can be
+  accepted but cannot create a metric without the required observations.
+- Exact raw repeats are audited; different payloads with one identity have no
+  silent winner. Consumers must explicitly resolve such conflicts upstream.
+- Cancelled/diverted cohorts are retained and excluded from normal arrival OTP.
+- Turnaround requires an explicitly supplied valid flight pair; tail swaps,
+  diversion and airport mismatch need upstream reconciliation.
+
+## Limits and next steps
+
+v0.1 is a batch alpha, tested on synthetic edge cases. It has not been validated
+against a full historical BTS release or an airline's production feed. Arrival
+clock-only records, diversion itineraries, multiple gate departures and revisions
+remain unresolved rather than guessed. Codes in supplied airport maps can change
+historically; raw official IDs are preserved but no historical resolver is bundled.
+
+Next steps should follow real usage: compare a dated BTS month with official
+totals, add optional columnar exports, and version provider schemas. A future
+event reducer would need distinct occurred/received timestamps and source
+revision rules; monthly BTS snapshots do not establish streaming behavior.

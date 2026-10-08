@@ -1,0 +1,99 @@
+import importlib.util
+import contextlib
+import io
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+from flightops_quality.cli import main
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class PipelineTests(unittest.TestCase):
+    def setUp(self):
+        self.silence = contextlib.redirect_stdout(io.StringIO())
+        self.silence.__enter__()
+        self.addCleanup(self.silence.__exit__, None, None, None)
+
+    def test_cli_to_warehouse_reconciles_all_rows(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "audit"
+            code = main([str(ROOT / "examples/synthetic_flights.csv"), "--output", str(output)])
+            self.assertEqual(code, 0)
+            audit = json.loads((output / "audit.json").read_text())
+            self.assertEqual(audit["counts"], {
+                "input": 11, "accepted": 6, "quarantined": 4, "duplicates": 1,
+            })
+            self.assertEqual(audit["summary"]["arrival_otp_15_completed"]["eligible"], 2)
+            self.assertEqual(audit["summary"]["arrival_otp_15_completed"]["percent"], 50)
+            spec = importlib.util.spec_from_file_location("etl", ROOT / "examples/etl_sqlite.py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            result = module.load(output / "audit.json", output / "warehouse.db")
+            self.assertEqual(result["raw_records"], 11)
+            self.assertEqual(result["routes"][0]["accepted_flights"], 6)
+            self.assertEqual(result["routes"][0]["arrival_otp_15_completed_percent"], 50)
+
+    def test_strict_exit_and_output_is_preserved(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "audit"
+            self.assertEqual(main([str(ROOT / "examples/synthetic_flights.csv"),
+                                   "--output", str(output), "--fail-on-error"]), 1)
+            prior = (output / "audit.json").read_bytes()
+            with self.assertRaises(SystemExit) as exc:
+                main([str(ROOT / "examples/synthetic_flights.csv"), "--output", str(output)])
+            self.assertEqual(exc.exception.code, 2)
+            self.assertEqual((output / "audit.json").read_bytes(), prior)
+
+    def test_python_module_entry_point(self):
+        run = subprocess.run([sys.executable, "-m", "flightops_quality", "--version"],
+                             capture_output=True, text=True, check=True)
+        self.assertEqual(run.stdout.strip(), "0.1.0")
+
+    def test_malformed_csv_produces_no_partial_audit(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "broken.csv"
+            source.write_text("source,record_id\ndemo,x,extra\n", encoding="utf-8")
+            output = Path(folder) / "audit"
+            with self.assertRaises(SystemExit) as exc:
+                main([str(source), "--output", str(output)])
+            self.assertEqual(exc.exception.code, 2)
+            self.assertFalse(output.exists())
+
+    def test_bts_cli_records_configuration_and_counts(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "audit"
+            code = main([str(ROOT / "examples/synthetic_bts.csv"), "--format", "bts",
+                         "--timezones", str(ROOT / "examples/airport_timezones.json"),
+                         "--midnight-policy", "end", "--output", str(output)])
+            self.assertEqual(code, 0)
+            audit = json.loads((output / "audit.json").read_text())
+            self.assertEqual(audit["counts"], {
+                "input": 5, "accepted": 4, "quarantined": 1, "duplicates": 0,
+            })
+            self.assertEqual(audit["manifest"]["bts_midnight_policy"], "end")
+            self.assertEqual(len(audit["manifest"]["timezone_mapping_sha256"]), 64)
+
+    def test_multiline_csv_reports_source_start_line(self):
+        import csv
+        from test_canonical import valid_row
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "multiline.csv"
+            row = {**valid_row(), "note": "first\nsecond"}
+            with source.open("w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=list(row))
+                writer.writeheader()
+                writer.writerow(row)
+                writer.writerow({**row, "record_id": "2", "note": "single"})
+            output = Path(folder) / "audit"
+            main([str(source), "--output", str(output)])
+            audit = json.loads((output / "audit.json").read_text())
+            self.assertEqual([r["row_number"] for r in audit["accepted"]], [2, 4])
+
+
+if __name__ == "__main__":
+    unittest.main()

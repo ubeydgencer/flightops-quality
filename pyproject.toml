@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flightops-quality"
+version = "0.1.0"
+description = "Explainable flight operations data quality, timezone normalization, and batch audit reports"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Ubeyd Gencer"}]
+keywords = ["aviation", "data-quality", "data-engineering", "bts", "etl", "timezone"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+[project.optional-dependencies]
+timezone = ["tzdata>=2024.1"]
+dev = ["build>=1.2", "ruff>=0.11", "twine>=5"]
+
+[project.scripts]
+flightops-quality = "flightops_quality.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ubeydgencer/flightops-quality"
+Issues = "https://github.com/ubeydgencer/flightops-quality/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+flightops_quality = ["py.typed"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
