@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.6 — 2026-10-09
+
+- The SQLite example reconstructs and checks the recorded summary before
+  creating a database. Previously a changed summary could report 100% coverage
+  while the same warehouse's accepted records and route SQL showed 50%.
+  Counts, OTP, coverage, exclusions and accepted status rates must agree with
+  the normalized timestamps and recorded dispositions.
+- Recorded findings in all three categories are validated and retained when
+  reconstructing finding-occurrence counts; repeated codes remain separate
+  occurrences. Findings are not regenerated from provider rows. Invalid
+  findings and contradictory summaries fail even with a failed-gate override.
+- Known v0.1.0/v0.1.1 audits without quality gates may omit both original
+  coverage fields together. All remaining summary fields must match; partial
+  omissions or missing modern fields fail. Verified summaries are retained
+  unchanged in warehouse metadata.
+- The core API, row ruleset 0.1.1 and all three dated monthly BTS JSON evidence
+  files are unchanged. This checks consistency rather than author authenticity.
+
 ## 0.2.5 — 2026-10-09
 
 - The SQLite example now recomputes each raw-record SHA-256 before creating a

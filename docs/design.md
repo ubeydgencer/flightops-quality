@@ -78,6 +78,14 @@ when a failed quality gate is explicitly overridden. This does not authenticate
 the audit author or check raw-to-normalized derivations again; the normalized
 timestamps are retained and stored KPIs are independently reconstructed.
 
+The recorded summary is also reconstructed before loading. Findings are retained
+in every disposition so `issue_counts` counts occurrences, including repeated
+codes in one record; it is not a count of distinct affected rows. Accepted
+timestamps and status flags determine OTP, coverage and exclusion populations.
+The supplied summary must agree and is preserved unchanged in metadata. The
+only legacy projection permits both absent coverage fields for known v0.1
+producers without a quality gate; other supplied summary fields are checked.
+
 ## Limits and next steps
 
 v0.2 is a batch alpha, tested on synthetic edge cases. It has not been validated

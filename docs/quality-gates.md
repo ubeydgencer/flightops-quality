@@ -172,6 +172,20 @@ audit author or compare against the original source file, and the loader does
 not re-normalize provider rows with a potentially different timezone database.
 Supply audits from your trusted local pipeline.
 
+The loader independently reconstructs `summary` from the accepted normalized
+timestamps/statuses and recorded findings across all dispositions. Counts,
+arrival OTP and coverage populations, exclusions, accepted cancellation/diversion
+rates and finding-occurrence counts must agree before loading. Finding counts
+include every occurrence, so repeated codes within one row contribute more
+than one. The supplied summary is preserved in `audit_metadata.summary_json`
+after verification; it is not silently corrected. A passed gate or manual
+failed-gate override cannot bypass this check.
+
+Known v0.1.0/v0.1.1 audits without a `quality_gate` may omit both
+`coverage_population` and `coverage_percent` together, as those producers did.
+All other summary fields are still checked. Omitting only one, using an unknown
+producer version or removing these fields from a modern summary is rejected.
+
 See [the rule catalog](rules.md) for row findings, [design](design.md) for identity
 and provenance policies, and [validation](validation.md) for the limits of the
 synthetic evidence.

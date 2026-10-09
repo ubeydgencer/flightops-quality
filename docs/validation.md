@@ -1,5 +1,42 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.6 warehouse summary reconciliation
+
+- **207 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
+  Release verification also runs the suite against clean wheel installations
+  outside the checkout.
+- An independent reproduction kept records, raw hashes, normalized metrics and
+  a passed gate unchanged while changing summary coverage from 1/2 (50%) to
+  1/1 (100%). The previous loader stored the changed summary while route SQL
+  still reported 50%. Removing the summary's finding counts likewise hid a
+  recorded `ACTUAL_INCOMPLETE` warning in metadata.
+- Summary reconstruction now retains validated recorded findings in every
+  disposition. Finding counts include occurrences, not distinct affected rows.
+  Counts, accepted status rates, OTP, coverage, exclusions and policy text must
+  agree before database creation; the supplied summary is preserved unchanged.
+- Eight new regressions cover contradictory metrics/counters, boolean/null/
+  missing/extra fields, Unicode and repeated custom findings, malformed findings
+  in all categories, valid current/legacy summaries, narrow legacy boundaries,
+  failed-gate overrides and CLI errors without output or source changes.
+- The existing v0.2.5 November audit loads all 3,246 raw observations into a new
+  warehouse: 3,245 accepted flights, one quarantine, 3,152 OTP-eligible flights
+  and 2,393 on-time observations. Metadata retains its v0.2.5 producer and
+  supplied summary; independently counted database findings agree, including
+  three `BTS_TIME_UNRESOLVED` occurrences in one row. The source audit is unchanged.
+  Row positions here belong to the extracted cohort CSV.
+- The known v0.1.0/v0.1.1 no-gate shape may omit both original coverage fields
+  together; all remaining fields are checked. Old Git sources confirm that
+  only these two summary fields were added in v0.2.0. No provider row is
+  normalized again and no recorded finding is regenerated.
+- All three dated BTS JSON evidence files are unchanged. The core API and row
+  ruleset 0.1.1 are unchanged. Ruff and Bandit pass with no findings; same-day
+  advisory evidence is reused only for unchanged audited development versions.
+  No new advisory scan or whole-package security guarantee is claimed.
+
+This is internal audit consistency evidence, not author authenticity or source
+ground truth. Verification is local; hosted GitHub Actions and PyPI publication
+remain unavailable with current access.
+
 ## v0.2.5 warehouse raw-record integrity
 
 - **199 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.

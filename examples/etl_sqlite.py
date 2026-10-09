@@ -17,10 +17,29 @@ from pathlib import Path
 from datetime import date
 
 from flightops_quality._raw import snapshot_raw
+from flightops_quality.analytics import summarize
 from flightops_quality.gates import QualityPolicy, evaluate_quality
-from flightops_quality.models import BatchReport, FlightLeg, RecordResult
+from flightops_quality.models import BatchReport, FlightLeg, Issue, RecordResult
 from flightops_quality.rules import flight_metrics, validate_leg
 from flightops_quality.time import resolve_timestamp
+
+
+def _audit_issues(record: dict) -> tuple[Issue, ...]:
+    """Retain recorded findings without rerunning provider normalization."""
+    issues = record.get("issues")
+    if not isinstance(issues, list):
+        raise ValueError("Audit records require a list of findings")
+    result = []
+    for issue in issues:
+        if (not isinstance(issue, dict) or set(issue) != {"code", "severity", "fields", "message"}
+                or any(not isinstance(issue[field], str) for field in ("code", "severity", "message"))
+                or not isinstance(issue["fields"], list)
+                or any(not isinstance(field, str) for field in issue["fields"])):
+            raise ValueError("Audit findings do not match the recorded finding contract")
+        snapshot_raw(issue)  # Validate UTF-8 text before retaining it in metadata.
+        result.append(Issue(issue["code"], issue["severity"], tuple(issue["fields"]), issue["message"]))
+    return tuple(result)
+
 
 def _audit_report(audit: dict) -> BatchReport:
     """Rehydrate the normalized v0.1/v0.2 flight contract, not provider raw rows.
@@ -70,9 +89,9 @@ def _audit_report(audit: dict) -> BatchReport:
             raise ValueError("Normalized flight does not match the audit contract") from exc
         if any(issue.severity == "error" for issue in validate_leg(flight)):
             raise ValueError("Accepted normalized flight fails chronology validation")
-        issues = record.get("issues")
-        if not isinstance(issues, list) or any(not isinstance(i, dict) or i.get("severity") == "error" for i in issues):
-            raise ValueError("Accepted audit records cannot contain malformed or error findings")
+        issues = _audit_issues(record)
+        if any(issue.severity == "error" for issue in issues):
+            raise ValueError("Accepted audit records cannot contain error findings")
         metrics = record.get("metrics")
         expected = flight_metrics(flight)
         if not isinstance(metrics, dict) or set(metrics) != set(expected):
@@ -83,10 +102,30 @@ def _audit_report(audit: dict) -> BatchReport:
                 raise ValueError("Stored flight KPI values must be finite numbers or null")
             if value != expected[metric]:
                 raise ValueError("Stored flight KPI values contradict normalized timestamps or status")
-        accepted.append(RecordResult(flight, (), {}))
-    def empty(category):
-        return tuple(RecordResult(None, (), {}) for _ in audit[category])
-    return BatchReport(tuple(accepted), empty("quarantined"), empty("duplicates"), audit["counts"]["input"])
+        accepted.append(RecordResult(flight, issues, {}))
+    def findings_only(category):
+        return tuple(RecordResult(None, _audit_issues(record), {}) for record in audit[category])
+    return BatchReport(tuple(accepted), findings_only("quarantined"),
+                       findings_only("duplicates"), audit["counts"]["input"])
+
+
+def _validate_summary(audit: dict, report: BatchReport) -> None:
+    expected = summarize(report)
+    summary = audit.get("summary")
+    if not isinstance(summary, dict):
+        raise ValueError("Audit requires a recorded summary")
+    snapshot_raw(summary)  # Reject nonfinite, invalid UTF-8 or deeply nested metadata.
+    # v0.1 producers did not emit the two arrival-coverage fields. Permit only
+    # that known, paired omission without discarding any supplied measurements.
+    otp = summary.get("arrival_otp_15_completed")
+    if (audit.get("package_version") in ("0.1.0", "0.1.1") and "quality_gate" not in audit
+            and isinstance(otp, dict)
+            and "coverage_population" not in otp and "coverage_percent" not in otp):
+        expected["arrival_otp_15_completed"].pop("coverage_population")
+        expected["arrival_otp_15_completed"].pop("coverage_percent")
+    if (json.dumps(summary, sort_keys=True, allow_nan=False)
+            != json.dumps(expected, sort_keys=True, allow_nan=False)):
+        raise ValueError("Audit summary contradicts its records, findings or normalized timestamps")
 
 
 def _quality_gate_status(audit: dict, allow_failed: bool, report: BatchReport) -> tuple[str, bool]:
@@ -169,6 +208,7 @@ def load(audit_path: Path, database_path: Path, *, allow_failed_quality_gate: bo
     _validate_counts(audit)
     _validate_raw_hashes(audit)
     report = _audit_report(audit)
+    _validate_summary(audit, report)
     gate_status, gate_override = _quality_gate_status(audit, allow_failed_quality_gate, report)
     query = Path(__file__).with_name("route_metrics.sql").read_text(encoding="utf-8")
     database_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)

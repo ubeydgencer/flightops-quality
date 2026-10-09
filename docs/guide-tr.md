@@ -159,6 +159,15 @@ nesne alanlarının sırası hash'i değiştirmez; ham kayıtlar yeniden normali
 Bu kontrol iç tutarlılığı doğrular; rapor sahibinin kimliğini veya özgün kaynak
 dosyayı doğrulamaz. Güvendiğiniz yerel veri akışının audit çıktısını kullanın.
 
+Rapor özeti de kabul edilen uçuşların normalize edilmiş zamanlarından ve durum
+bayraklarından yeniden hesaplanır. Üç kategorinin kayıtlı bulguları korunur;
+bulgu sayacı aynı kayıtta tekrarlanan kodların her oluşumunu sayar. Uçuş sayıları,
+OTP, kapsama, hariç tutulan uçuşlar ve iptal/yönlendirme oranları özetle uyuşmazsa
+yükleme reddedilir. Başarılı kalite kapısı veya manuel istisna bunu atlayamaz;
+özet sessizce değiştirilmez. Kalite kapısı olmayan eski 0.1.0/0.1.1 raporları,
+bu sürümlerde üretilmeyen iki kapsama alanını birlikte içermeyebilir; diğer
+alanları yine doğrulanır.
+
 Python veri akışında `QualityPolicy` ve `evaluate_quality` doğrudan
 `flightops_quality` paketinden alınabilir. Aynı politikayı
 `audit_document(report, quality_policy=policy)` çağrısına vererek karar ve audit

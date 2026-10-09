@@ -60,6 +60,12 @@ There is no guaranteed response deadline for this independently maintained proje
   is not a signature: changing both the payload and its digest can still produce
   consistent input. This does not authenticate the author, re-read the original
   source file or re-normalize raw provider records.
+- The loader reconstructs summary counts, accepted-cohort metrics and finding
+  occurrences from the normalized flights and validated recorded findings.
+  A contradictory summary is rejected before database creation, even if the
+  gate passed or a failed gate was manually overridden. Findings are checked
+  for their recorded shape, severity and UTF-8 text; they are not regenerated.
+  Only the known v0.1 no-gate shape may omit both original coverage fields.
 - Batch thresholds reject nonfinite percentages, boolean values and invalid
   counts. Policy and result are audit metadata, not signed authenticity evidence;
   the SQLite example expects an audit from a trusted local pipeline.

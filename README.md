@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.5](https://img.shields.io/badge/Release-0.2.5%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.5)
+[![Alpha 0.2.6](https://img.shields.io/badge/Release-0.2.6%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.6)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -165,6 +165,13 @@ Changed payloads, missing or inconsistent digests and duplicate JSON object keys
 are rejected before database creation; the failed-gate override cannot bypass
 these checks. This checks internal consistency, not the author's identity or
 the original source file. Use audits from your trusted local pipeline.
+
+The loader also reconstructs the recorded summary from normalized timestamps,
+status flags and findings in all three dispositions. OTP, arrival coverage,
+exclusions, cancellation/diversion rates and finding-occurrence counts must
+agree before loading. A passing quality gate does not bypass this check.
+Known v0.1 audits without quality gates may omit the two coverage fields that
+those versions did not produce; their remaining summary is still checked.
 
 ## Data contract
 
