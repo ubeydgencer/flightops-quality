@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.7](https://img.shields.io/badge/Release-0.2.7%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.7)
+[![Alpha 0.2.8](https://img.shields.io/badge/Release-0.2.8%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.8)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -172,6 +172,33 @@ exclusions, cancellation/diversion rates and finding-occurrence counts must
 agree before loading. A passing quality gate does not bypass this check.
 Known v0.1 audits without quality gates may omit the two coverage fields that
 those versions did not produce; their remaining summary is still checked.
+
+### Inspect recorded findings with SQL
+
+After loading, inspect accepted, quarantined and duplicate findings together:
+
+```bash
+python examples/warehouse_findings.py example-output/warehouse.db
+```
+
+The optional [SQL query](examples/warehouse_findings.sql) reports each code and
+severity with its **occurrences** and **distinct affected audit records**, split
+by disposition. Global totals count each affected audit ID once, even when it
+has several codes. Source row positions need not be unique and are not IDs.
+
+For the recorded November warehouse, `BTS_TIME_UNRESOLVED` occurs three times in
+one quarantined record. Across all codes there are six findings in that same
+record; the other 3,245 raw records have none. Adding per-code affected counts
+would overstate the number of affected records. These are recorded data-quality
+findings.
+
+This report reads an existing, closed warehouse using SQLite read-only mode and
+a single read snapshot. It requires working `json_each` and `json_extract`
+functions, checked at runtime; missing support produces a clear error and does
+not affect the loader. See [SQLite JSON support](https://www.sqlite.org/json1.html).
+No findings returns an empty group list, zero finding totals and the original raw
+record count. This inspects stored findings; it does not revalidate the original
+dataset.
 
 ## Data contract
 

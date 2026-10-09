@@ -191,6 +191,39 @@ yükleme reddedilir. Başarılı kalite kapısı veya manuel istisna bunu atlaya
 bu sürümlerde üretilmeyen iki kapsama alanını birlikte içermeyebilir; diğer
 alanları yine doğrulanır.
 
+### Veri ambarındaki bulguları sayma
+
+Yükleme tamamlandıktan ve veritabanı bağlantısı kapandıktan sonra, bulguların
+kaç kez oluştuğunu ve kaç ayrı kaydı etkilediğini birlikte görün:
+
+```bash
+python examples/warehouse_findings.py example-output/warehouse.db
+```
+
+Bu isteğe bağlı örnek JSON özeti yazdırır. `raw_records` bütün ham kayıtları,
+`records_with_findings` en az bir bulgusu olan kayıtları,
+`records_without_findings` bulgusuz kayıtları, `finding_occurrences` ise toplam
+bulgu oluşumunu sayar. `findings` listesi kod ve önem düzeyine göre grupları;
+her grubun oluşumlarını, ayrı etkilenen kayıtlarını ve kabul/karantina/tekrar
+dağılımını gösterir. Ayrı kayıt sayısı kaynak satır numarası yerine ambarın
+`audit_record_id` kimliğine dayanır.
+
+Aynı kayıtta bir kod üç kez bulunursa üç oluşum ve bir etkilenen kayıt vardır.
+Bir kayıt birden fazla gruba girebildiği için grupların etkilenen kayıt sayılarını
+toplamak, genel etkilenen kayıt sayısını vermez. Bu ayrım farklı önem düzeyleri
+arasında da geçerlidir. [Kasım kohortunda](bts-2025-11-route-cohort.md) altı bulgu
+oluşumunun tamamı tek bir karantina kaydına aittir; 3.245 kabul kaydında bulgu
+yoktur.
+
+Sorgu [SQLite JSON işlevlerini](https://www.sqlite.org/json1.html) gerektirir.
+Örnek, `json_each` ve `json_extract` desteğini kontrol eder; destek yoksa açık
+bir hata verir. Bu gereksinim mevcut yükleyiciyi veya paket API'sini etkilemez.
+[SQL dosyası](../examples/warehouse_findings.sql) ayrıca incelenebilir;
+Python'da `analyze(Path(...))` aynı raporu döndürür. Örnek, güvendiğiniz yerel
+yükleyicinin oluşturduğu mevcut bir ambarı salt okunur açar ve veritabanını
+değiştirmez. Audit sahibini doğrulamaz, yükleme kontrollerini tekrarlamaz veya
+uçuş kayıtlarını yeniden normalize etmez.
+
 Python veri akışında `QualityPolicy` ve `evaluate_quality` doğrudan
 `flightops_quality` paketinden alınabilir. Aynı politikayı
 `audit_document(report, quality_policy=policy)` çağrısına vererek karar ve audit

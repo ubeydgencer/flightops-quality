@@ -98,6 +98,30 @@ The supplied summary must agree and is preserved unchanged in metadata. The
 only legacy projection permits both absent coverage fields for known v0.1
 producers without a quality gate; other supplied summary fields are checked.
 
+## Warehouse finding analysis
+
+The optional [finding query](../examples/warehouse_findings.sql) expands
+`raw_records.issues_json` using [SQLite JSON functions](https://www.sqlite.org/json1.html).
+It groups by code and severity, retaining occurrence counts separately from
+distinct affected `audit_record_id` counts and their accepted/quarantined/duplicate
+dispositions. A code recorded three times in one observation contributes three
+occurrences and one affected record. Different codes or severities can affect
+the same record, so summing group-level affected counts does not give the global
+affected population. Source row numbers are positions, not unique record keys.
+
+`python examples/warehouse_findings.py example-output/warehouse.db` emits a JSON
+report with global raw-record, affected/unaffected-record and occurrence totals,
+plus the grouped findings. Its `analyze(Path(...))` function returns the same
+dictionary. It reads an existing, closed warehouse produced by the trusted
+local loader through an [SQLite `mode=ro` URI](https://www.sqlite.org/uri.html),
+sets `query_only` and runs the totals and groups in one read transaction. The
+analysis creates no tables and changes no database contents. It does not
+authenticate the producer, revalidate an audit or normalize provider records.
+
+The example probes runtime support for `json_each` and `json_extract` and fails
+clearly if unavailable. This optional reporting capability adds no dependency
+to the loader or core API and does not change their schema or row rules.
+
 ## Limits and next steps
 
 v0.2 is a batch alpha, tested on synthetic edge cases. It has not been validated

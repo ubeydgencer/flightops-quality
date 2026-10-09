@@ -259,14 +259,26 @@ the finding records missing disambiguation under this policy, rather than
 establishing that the provider reported an incorrect time.
 
 The same row also has three `BTS_TIME_UNRESOLVED` field findings, plus
-`SCHEDULE_INCOMPLETE` and `ACTUAL_INCOMPLETE` warnings. Issue counts count source
-rows containing a code. These four distinct codes therefore describe **one
-affected row**, rather than four bad flights. The row is excluded from both
-held-out comparisons with the explicit `dst_ambiguous` reason.
+`SCHEDULE_INCOMPLETE` and `ACTUAL_INCOMPLETE` warnings. In the recorded evidence,
+`validation.normalizer_issue_counts` counts source rows containing a code, so
+each of the four codes has a count of one. By contrast,
+`validation.batch_summary.issue_counts` counts every finding occurrence:
+`BTS_TIME_UNRESOLVED` has three and the other codes have one each. These
+**six occurrences affect one row**. The row is excluded from both held-out
+comparisons with the explicit `dst_ambiguous` reason.
 
 Its reported `ArrDelay=-12` is usable in source-input accounting and counts as
 on time there. A reported target value does not resolve the schedule anchor or
 turn an unresolved reconstruction into a held-out match.
+
+The optional [warehouse findings report](guide-tr.md#veri-ambarındaki-bulguları-sayma)
+shows both populations after the extracted cohort is audited and loaded into
+SQLite. Among 3,246 raw records, one quarantined record has all six finding
+occurrences; the 3,245 accepted records have none. Each code/severity group has
+one affected record, including the group with three `BTS_TIME_UNRESOLVED`
+occurrences. Group-level affected counts overlap and must not be added to obtain
+the global affected population. The report reads recorded findings; it does not
+add independent timestamp evidence or resolve the ambiguous departure.
 
 ### Metrics and denominators
 

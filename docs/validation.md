@@ -1,5 +1,42 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.8 read-only warehouse finding analysis
+
+- **229 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
+  Release verification also runs the suite against clean wheel installations
+  outside the checkout.
+- Nine new regressions compare SQL results with independent Python occurrence
+  counters and affected-audit-ID sets. They cover repeated codes, the same code
+  at different severities, accepted/quarantined/duplicate findings, overlapping
+  groups and repeated source row positions. Aggregated code occurrences agree
+  with the recorded audit summary.
+- Empty and nonempty clean warehouses preserve their raw-record counts and
+  report zero finding totals with an empty group list. Quarantine and duplicate
+  findings remain visible because the query does not join the flights table.
+- Read-only tests cover Unicode/custom code values, literal SQL-like text and
+  filenames containing URI option characters. Missing files, directories and
+  wrong schemas fail clearly without creating a database or returning partial
+  JSON. A simulated unavailable SQLite JSON capability produces an explicit
+  error; an injected write query fails and preserves the database bytes.
+- The existing November warehouse has 3,246 raw records, 3,245 without findings,
+  and one quarantined record with six findings. `BTS_TIME_UNRESOLVED` accounts
+  for three occurrences in that one record. Independent counts agree with both
+  SQL group/global totals and the stored summary; the database hash is unchanged.
+  This is a read of the existing v0.2.5 audit's warehouse, not new normalization.
+- The optional report probes SQLite `json_each` / `json_extract`, uses encoded
+  read-only URIs and query-only mode, and keeps all warehouse queries in one
+  read transaction. An independent review checked counting, URI handling,
+  transaction boundaries and connection closure. Ruff and Bandit pass.
+- The core API, loader behavior, row ruleset 0.1.1 and three dated BTS evidence
+  JSON files are unchanged. The November document now names the two distinct
+  counter scopes explicitly; the recorded evidence is not rewritten.
+
+The report inspects stored findings in a trusted, closed warehouse produced by
+the loader. It does not revalidate source data or authenticate the author.
+Per-code/severity affected counts can overlap and must not be added together;
+the global total counts distinct audit IDs across all findings. Verification
+is local; GitHub Actions was not run and the package is not published on PyPI.
+
 ## v0.2.7 bounded warehouse input
 
 - **220 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.

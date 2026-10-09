@@ -56,7 +56,7 @@ class PipelineTests(unittest.TestCase):
     def test_python_module_entry_point(self):
         run = subprocess.run([sys.executable, "-m", "flightops_quality", "--version"],
                              capture_output=True, text=True, check=True)
-        self.assertEqual(run.stdout.strip(), "0.2.7")
+        self.assertEqual(run.stdout.strip(), "0.2.8")
 
     def test_configured_gates_pass_at_exact_boundaries(self):
         with tempfile.TemporaryDirectory() as folder:

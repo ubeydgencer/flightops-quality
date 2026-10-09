@@ -75,6 +75,14 @@ There is no guaranteed response deadline for this independently maintained proje
   gate passed or a failed gate was manually overridden. Findings are checked
   for their recorded shape, severity and UTF-8 text; they are not regenerated.
   Only the known v0.1 no-gate shape may omit both original coverage fields.
+- The optional warehouse findings example opens an existing, closed database
+  created by the trusted local loader using an [SQLite `mode=ro` URI](https://www.sqlite.org/uri.html),
+  enables `query_only` and reads totals and grouped findings in one transaction.
+  It creates no tables and does not change database contents. Runtime
+  `json_each` / `json_extract` support is checked before reporting. This is a
+  report over recorded findings, not database authentication, audit revalidation
+  or flight normalization; read-only access does not make an arbitrary database
+  a trusted input. Use the same access controls as for other local audit data.
 - Batch thresholds reject nonfinite percentages, boolean values and invalid
   counts. Policy and result are audit metadata, not signed authenticity evidence;
   the SQLite example expects an audit from a trusted local pipeline.

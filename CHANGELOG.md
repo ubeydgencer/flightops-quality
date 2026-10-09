@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.8 — 2026-10-09
+
+- Added an optional read-only warehouse finding report and independent SQL
+  query. It groups all accepted, quarantined and duplicate findings by code
+  and severity, separating occurrences from distinct affected audit records.
+- Global affected-record totals use distinct audit IDs across every finding;
+  per-code affected counts must not be added together. Repeated source row
+  positions remain separate audit records. Empty/no-finding batches return an
+  empty group list and zero finding totals.
+- The report uses encoded SQLite read-only URIs, query-only mode and a read
+  transaction. JSON function availability is checked at runtime. This optional
+  example adds no requirement to the existing warehouse loader or core API.
+- Clarified that BTS benchmark `normalizer_issue_counts` counts affected source
+  rows per code, while batch `issue_counts` counts recorded occurrences. The
+  core rules, row ruleset 0.1.1 and three dated BTS JSON evidence files are unchanged.
+
 ## 0.2.7 — 2026-10-09
 
 - The SQLite example now bounds audit input independently of the source CSV:
