@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.3 — 2026-10-09
+
+- A second dated BTS benchmark covers March 2025 and the US spring timezone
+  transition: 600,872 source rows scanned and all 3,079 selected JFK/LAX/ORD
+  observations retained. Each held-out field matches all 3,061 comparable
+  observations; nine cancellations and nine diversions are explicit exclusions.
+- Optional evidence records each airport zone's own UTC offset at the start and
+  end of accepted unique scheduled or normal actual flight windows. It detects
+  15 scheduled and 18 actual windows with changes, with 23 and 25 zone-change
+  observations respectively. Ordinary differences between airport zones are
+  not counted as transitions. Counts and bounded examples retain their grain.
+- The offline HTML view validates and displays this optional coverage section,
+  including exclusions, signed offsets, original row references and UTC/local
+  endpoints. Explicit null or contradictory new coverage is rejected; earlier
+  evidence without the section continues to render.
+- Dated FAA February/March airport snapshots and IANA 2025a rules document the
+  curated timezone map. UTC-offset coverage remains derived evidence, not
+  independent absolute UTC validation. Compensating changes inside a window
+  are outside endpoint comparison's scope; fall DST is covered synthetically.
+- January evidence remains byte-for-byte unchanged. The core API and row ruleset
+  0.1.1 are unchanged.
+
 ## 0.2.2 — 2026-10-09
 
 - BTS benchmark publication now includes a static offline HTML report alongside

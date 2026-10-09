@@ -158,15 +158,31 @@ arasında tutarlılık sağlayın.
 
 ## Doğrulama ve kapsam
 
-Bu sürüm, sentetik uç durum testlerine ek olarak BTS'nin Ocak 2025 dosyasındaki
-JFK, LAX ve ORD arasındaki 2.929 kaynak kaydıyla sınanmış bir toplu işleme alpha
-sürümüdür. 2.928 kayıt kabul edilmiş, saat ve süre alanları çelişen bir kayıt
+Bu sürüm, sentetik uç durum testlerine ek olarak BTS'nin Ocak ve Mart 2025
+dosyalarındaki JFK, LAX ve ORD arasındaki kayıtlarla sınanmış bir toplu işleme
+alpha sürümüdür. Ocak kohortunda 2.929 kaynak kaydından 2.928'i kabul edilmiş,
+saat ve süre alanları çelişen bir kayıt
 karantinaya alınmıştır. Varış gecikmesi ve havada kalma süresi karşılaştırmasına
 giren 2.909 kayıtta kaynakla eşleşme görülmüştür; 11 iptal, 8 diversion ve bir
 saat çelişkisi açık dışlama nedenleriyle raporlanmıştır.
 
-[Tarihli kaynak, tekrar çalıştırma komutu ve sonuçlar](bts-2025-01-route-cohort.md)
-ayrı belgede yer alır. Bu çalışma ayın bütün havaalanlarını, mutlak UTC
+[Ocak kaynağı, tekrar çalıştırma komutu ve sonuçları](bts-2025-01-route-cohort.md)
+ayrı belgede yer alır.
+
+[Mart kohortunda](bts-2025-03-route-cohort.md) 3.079 kaydın tamamı kabul edilmiş;
+iki hedef alan, karşılaştırmaya giren 3.061 normal uçuşta eşleşmiştir. 9 iptal ve
+9 diversion karşılaştırma dışında açıkça sayılmıştır. Kabul edilen normal
+uçuşlarda varış kapsamı %100, OTP %84,4169'dur; bunlar farklı ölçümlerdir.
+
+Mart raporu, 9 Mart ilkbahar saat geçişini kapsayan türetilmiş zaman pencerelerini
+de gösterir. Tüm durumları içeren 3.079 kabul kaydının SOBT → SIBT pencereleri
+arasında 15, 3.061 normal kabul kaydının AOBT → AIBT pencereleri arasında 18
+pencerede ofset farkı bulunmuştur. Her havaalanı diliminin kendi ofseti aynı UTC
+penceresinin iki ucunda karşılaştırılır; çıkış ve varış dilimleri birbirleriyle
+karşılaştırılmaz. Bu sonuç mutlak UTC doğruluğuna ilişkin bağımsız bir kanıt
+değildir.
+
+Bu çalışmalar ayın bütün havaalanlarını, mutlak UTC
 tarihlerinin bağımsız doğruluğunu veya bir havayolunun üretim verisini
 doğrulamaz. Paketle gelen CSV örnekleri sentetiktir; gerçek kaynak dosyası ayrıca
 indirilir. Testlerin ve dağıtım kontrollerinin sürüm bazında sonuçları
@@ -185,18 +201,19 @@ Depodaki JSON kanıtını çevrimdışı bir HTML raporuna dönüştürün:
 
 ```bash
 python examples/bts_validation_html.py \
-  --input docs/evidence/bts-2025-01-route-cohort.json \
-  --output bts-report.html
+  --input docs/evidence/bts-2025-03-route-cohort.json \
+  --output bts-report-2025-03.html
 ```
 
-`bts-report.html` dosyasını tarayıcıda açın. Rapor statiktir; JavaScript veya uzak
+`bts-report-2025-03.html` dosyasını tarayıcıda açın. Rapor statiktir; JavaScript veya uzak
 sunucudan yazı tipi kullanmaz. Kaynak arşivinin ve saat dilimi eşlemesinin hash
 değerlerini, kaynak dönemini, çalışma ortamını, kayıt durumlarını ve saat
-bulgularını gösterir. Karşılaştırmaya giren kayıtlarla dışlama nedenlerinin
+bulgularını ve kayıtlı ofset pencerelerini gösterir. Karşılaştırmaya giren kayıtlarla dışlama nedenlerinin
 paydaları ve kaynak grubunun OTP'siyle kabul grubunun OTP'si ayrı tutulur.
 HTML oluşturmak yeni bir veri doğrulaması çalıştırmaz; kaydedilmiş kanıtı sunar.
 
 Yeni bir çıktı dosyası seçin; var olan dosyalar üzerine yazılmaz. Resmî arşivi
 yeniden inceleyen `examples/validate_bts_month.py` komutu da `validation.json` ve
 `cohort.csv` yanında `validation.html` üretir. Gerçek aylık kaynak ve tam kohort
-pakete eklenmez; JSON kanıtında sınırlı bir kaynak bulgusu örneği bulunur.
+pakete eklenmez; Ocak JSON kanıtında sınırlı bir kaynak bulgusu örneği bulunur.
+Mart kanıtı sınırlı sayıda türetilmiş ofset penceresi örneği içerir.

@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.2](https://img.shields.io/badge/Release-0.2.2%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.2)
+[![Alpha 0.2.3](https://img.shields.io/badge/Release-0.2.3%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.3)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -87,33 +87,44 @@ Pin Python, the timezone database and the mapping to reproduce historical analys
 
 ### Dated real-source validation
 
-An offline benchmark selects all January 2025 BTS source rows whose origin and
-destination are both JFK, LAX or ORD. It preserves the source fields and positions,
-checks the downloaded archive's SHA-256 and separates source-input KPI parity
-from held-out reconstruction of arrival delay and airborne time. Of 2,929 selected
-rows, 2,928 are accepted and one is quarantined. Both held-out fields match on
-2,909 comparable rows; cancellations, diversions and a clock-inconsistent row are
-accounted for separately. The original monthly data and full cohort are not
-bundled; versioned evidence includes a bounded diagnostic source excerpt.
-See [the dated route-cohort recipe, evidence and limits](docs/bts-2025-01-route-cohort.md).
+Offline benchmarks select every January or March 2025 BTS source row whose
+origin and destination are both JFK, LAX or ORD, retaining all statuses. They
+preserve source fields and positions, check archive SHA-256 hashes and separate
+source-input KPI parity from held-out reconstruction of arrival delay and
+airborne time.
 
-Render the recorded evidence as an offline HTML report:
+| Dated route cohort | Selected | Accepted unique | Quarantined | Comparable rows per held-out field |
+|---|---:|---:|---:|---:|
+| [January 2025](docs/bts-2025-01-route-cohort.md) | 2,929 | 2,928 | 1 | 2,909 |
+| [March 2025](docs/bts-2025-03-route-cohort.md) | 3,079 | 3,079 | 0 | 3,061 |
 
-The [sample report](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.2/bts-2025-01-report.html)
-and its [recorded JSON](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.2/bts-2025-01-route-cohort.json)
-are also downloadable release assets. Open the HTML locally; the evidence retains
-its original v0.2.1 producer metadata.
+Both held-out fields match on every comparable row in these runs; cancellations,
+diversions and January's clock finding have explicit exclusion populations.
+March also records endpoint-offset changes in 15 scheduled and 18 actual flight
+windows, with different documented populations. These diagnostics exercise the
+pinned timezone rules; they do not independently verify absolute UTC instants.
+The original monthly data and full cohorts are not bundled. Evidence contains
+bounded diagnostic examples; these are route-cohort benchmarks, not validation
+of every airport or a production feed.
+
+The [March sample report](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.3/bts-2025-03-report.html)
+and its [recorded JSON](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.3/bts-2025-03-route-cohort.json)
+are downloadable release assets. The [January report](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.2/bts-2025-01-report.html)
+retains its original v0.2.1 evidence metadata. Render the committed March evidence
+as an offline HTML report:
 
 ```bash
 python examples/bts_validation_html.py \
-  --input docs/evidence/bts-2025-01-route-cohort.json \
-  --output bts-report.html
+  --input docs/evidence/bts-2025-03-route-cohort.json \
+  --output bts-report-2025-03.html
 ```
 
-Open `bts-report.html` in a browser. It is a static report with no JavaScript or
+Open `bts-report-2025-03.html` in a browser. It is a static report with no JavaScript or
 remote fonts. Source/mapping hashes, period, runtime, record dispositions,
 held-out comparison counts and exclusions, clock findings and OTP for the source
-and accepted populations remain visible together. Choose a new output filename;
+and accepted populations remain visible together, alongside recorded timezone
+offset windows. Rendering stored evidence does not validate a new dataset.
+Choose a new output filename;
 existing files are preserved. A fresh archive-validation run also produces
 `validation.html` beside its JSON and extracted cohort.
 

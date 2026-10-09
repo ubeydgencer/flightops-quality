@@ -108,6 +108,87 @@ def _table(headers, rows, *, code_values=False):
     return f'<div class="table-wrap"><table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>'
 
 
+def _timezone_coverage_html(value, accepted_rows, normal_rows, zones):
+    """Validate optional endpoint-change accounting before displaying recorded text."""
+    value = _mapping(value, "timezone_offset_transitions")
+    policy = _mapping(value.get("policy"), "timezone_offset_transitions.policy")
+    rows, examples_html = [], []
+    for window, population in (("scheduled", accepted_rows), ("actual", normal_rows)):
+        item = _mapping(value.get(window), f"timezone_offset_transitions.{window}")
+        numbers = {key: _count(item.get(key), f"{window}.{key}") for key in (
+            "population_rows", "checked", "offset_change_rows", "zone_change_observations")}
+        excluded = _counter(item.get("excluded_counts"), f"{window}.excluded_counts")
+        changed, observed = numbers["offset_change_rows"], numbers["zone_change_observations"]
+        if (numbers["population_rows"] != population
+                or set(excluded) != {"missing_timestamps"}
+                or numbers["checked"] + sum(excluded.values()) != population
+                or changed > numbers["checked"] or not changed <= observed <= 2 * changed
+                or item.get("reconciled") is not True):
+            raise ValueError(f"{window} timezone populations do not reconcile")
+        rows.append((window.title(), population, numbers["checked"], excluded["missing_timestamps"],
+                     changed, observed))
+        examples = item.get("examples")
+        if not isinstance(examples, list) or len(examples) != min(10, changed):
+            raise ValueError(f"{window} timezone examples must record up to ten changed rows")
+        sampled_observations, seen = 0, set()
+        for example in examples:
+            example = _mapping(example, f"{window} timezone example")
+            line = _count(example.get("source_row_number"), "timezone example source row")
+            record_id, source_name = example.get("record_id"), example.get("source", "")
+            if not isinstance(record_id, str) or not record_id or not isinstance(source_name, str):
+                raise ValueError("Timezone examples require string record identities")
+            identity = (source_name, record_id, line)
+            if not line or identity in seen:
+                raise ValueError("Timezone example row references must be positive and identities unique")
+            seen.add(identity)
+            changes = example.get("changes")
+            if not isinstance(changes, list) or not 1 <= len(changes) <= 2:
+                raise ValueError("Timezone examples require one or two unique zone changes")
+            change_rows, seen_zones = [], set()
+            for change in changes:
+                change = _mapping(change, "timezone example change")
+                zone = change.get("timezone")
+                if not isinstance(zone, str) or zone not in zones.values() or zone in seen_zones:
+                    raise ValueError("Timezone example changes must use unique recorded map zones")
+                seen_zones.add(zone)
+                start, end, delta = (change.get(key) for key in (
+                    "offset_start_seconds", "offset_end_seconds", "change_seconds"))
+                if (any(isinstance(n, bool) or not isinstance(n, int) or abs(n) > 172800
+                        for n in (start, end, delta)) or start == end or end - start != delta):
+                    raise ValueError("Timezone example offsets do not reconcile")
+                change_rows.append((zone, start, end, delta, change.get("local_start"),
+                                    change.get("local_end")))
+            sampled_observations += len(changes)
+            examples_html.append(
+                f'<details><summary>{window.title()} · source CSV line {_text(line)} · '
+                f'{_text(example.get("origin"))} → {_text(example.get("destination"))}</summary>'
+                + _table(("Recorded window", "Value"), (
+                    ("Record ID", example.get("record_id")),
+                    ("Service date", example.get("service_date")),
+                    ("Window start · UTC", example.get("window_start_utc")),
+                    ("Window end · UTC", example.get("window_end_utc"))))
+                + _table(("Same IANA zone", "Start offset · seconds", "End offset · seconds",
+                          "Change · seconds", "Local window start", "Local window end"), change_rows)
+                + '</details>')
+        unsampled_rows = changed - len(examples)
+        if not sampled_observations + unsampled_rows <= observed <= sampled_observations + 2 * unsampled_rows:
+            raise ValueError("Timezone example observations disagree with their recorded count")
+    return (
+        '<section id="timezone-coverage"><h2>Timezone offset changes within flight windows</h2>'
+        '<p>Each mapped airport zone is compared with itself at both UTC endpoints. '
+        'Ordinary differences between departure and arrival airport zones are not changes. '
+        'Scheduled windows use all accepted unique flights; actual windows use accepted '
+        'normal flights, excluding cancellation and diversion.</p>'
+        + _table(("Window", "Population rows", "Compared", "Missing endpoints", "Rows with change",
+                  "Zone-change observations"), rows)
+        + '<p class="muted">A row can show changes in both airport zones. Examples show at most ten '
+        'rows per window. Endpoint comparison can miss multiple offset changes that cancel out. '
+        'These are derived coverage observations, not independent validation of absolute UTC.</p>'
+        + ''.join(examples_html)
+        + '<h3>Recorded offset-comparison policy</h3>'
+        + _table(("Policy", "Recorded value"), policy.items()) + '</section>')
+
+
 def render_validation_html(document, *, input_sha256=None):
     """Escape recorded evidence and reject contradictory count/percentage fields."""
     if not isinstance(document, dict):
@@ -201,6 +282,10 @@ def render_validation_html(document, *, input_sha256=None):
     if sum(status_cohorts.values()) != count:
         raise ValueError("Source status cohorts do not reconcile")
     zones = _mapping(cohort.get("airport_timezones"), "cohort.airport_timezones")
+    timezone_html = _timezone_coverage_html(
+        validation.get("timezone_offset_transitions"), dispositions["accepted"],
+        derived["coverage_population"], zones) if "timezone_offset_transitions" in validation else ""
+    timezone_nav = '<a href="#timezone-coverage">Timezone coverage</a>' if timezone_html else ""
     period = source.get("period")
     cards = "".join(f'<div class="card"><span class="muted">{label}</span><strong>{_text(number)}</strong><small>{note}</small></div>'
                     for label, number, note in (
@@ -228,7 +313,7 @@ def render_validation_html(document, *, input_sha256=None):
         '<header><div class="eyebrow">FlightOps Quality · civil aviation data engineering</div>'
         f'<h1>BTS route-cohort evidence</h1><p><span class="pill">{_text(period)}</span> · {_text(" · ".join(zones))}</p>'
         '<p class="muted">An offline view of recorded source consistency. This page does not rerun normalization or establish independent ground truth.</p>'
-        '<nav aria-label="Report sections"><a href="#accounting">Accounting</a><a href="#checks">Held-out checks</a><a href="#metrics">Metrics</a><a href="#findings">Findings</a><a href="#provenance">Provenance</a></nav></header>'
+        f'<nav aria-label="Report sections"><a href="#accounting">Accounting</a><a href="#checks">Held-out checks</a><a href="#metrics">Metrics</a>{timezone_nav}<a href="#findings">Findings</a><a href="#provenance">Provenance</a></nav></header>'
         f'<section id="accounting"><h2>Source and selected cohort</h2><div class="cards">{cards}</div>'
         f'<p class="notice">Selection predicate: {_text(cohort.get("predicate"))}</p>'
         + _table(("Disposition", "Source rows"), dispositions.items())
@@ -244,7 +329,7 @@ def render_validation_html(document, *, input_sha256=None):
         '<p>On time means arrival delay &lt; 15 minutes; exactly 15 is late. OTP uses eligible flights. Coverage uses all normal flights in the stated population. Empty denominators are unavailable.</p>'
         + _table(("Population", "Eligible", "On time", "Late", "OTP", "Arrival coverage · eligible / population"), kpi_rows)
         + '<p class="muted">Source-input accounting and held-out reconstruction are separate evidence. Both depend on fields reported by the same provider; neither independently validates absolute UTC dates.</p>'
-        + '</section><section id="findings"><h2>Recorded quality findings</h2>'
+        + '</section>' + timezone_html + '<section id="findings"><h2>Recorded quality findings</h2>'
         + (_table(("Code", "Source rows containing normalizer code", "Batch finding occurrences"), issue_rows) if issue_rows else '<p>No recorded findings.</p>')
         + '<p class="muted">Each normalizer code counts affected source rows once. Batch occurrences count individual findings, including group findings. Diagnostic examples show at most ten source rows and are not totals.</p>'
         + ''.join(diagnostic_sections)

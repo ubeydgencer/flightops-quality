@@ -2,15 +2,18 @@ import copy
 import hashlib
 import importlib.util
 import json
+import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from test_bts import ZONES, bts_row
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("bts_validation", ROOT / "examples/bts_validation.py")
 VALIDATION = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(VALIDATION)
+with patch.object(sys, "path", [str(ROOT / "examples"), *sys.path]):
+    SPEC.loader.exec_module(VALIDATION)
 
 
 class BtsValidationTests(unittest.TestCase):
@@ -21,6 +24,14 @@ class BtsValidationTests(unittest.TestCase):
             self.assertTrue(check["reconciled"])
             self.assertEqual(check["checked"] + sum(check["excluded_counts"].values()), len(rows))
             self.assertEqual(check["matched"] + check["mismatched"], check["checked"])
+        coverage = result["timezone_offset_transitions"]
+        self.assertEqual(coverage["scheduled"]["population_rows"], result["group_dispositions"]["accepted"])
+        self.assertEqual(coverage["actual"]["population_rows"],
+                         result["batch_summary"]["arrival_otp_15_completed"]["coverage_population"])
+        for window in ("scheduled", "actual"):
+            item = coverage[window]
+            self.assertTrue(item["reconciled"])
+            self.assertEqual(item["checked"] + sum(item["excluded_counts"].values()), item["population_rows"])
         json.dumps(result, allow_nan=False)
         return result
 

@@ -15,6 +15,8 @@ from datetime import date
 from decimal import Decimal, DecimalException
 from typing import Iterable, Mapping
 
+from bts_timezone_coverage import timezone_offset_coverage
+
 from flightops_quality.adapters.bts import normalize_bts_row
 from flightops_quality.analytics import summarize
 from flightops_quality.batch import analyze_results
@@ -252,6 +254,7 @@ def validate_rows(rows: Iterable[tuple[int, Mapping]], airport_timezones: Mappin
             "policy": "Original signed ArrDelay, strict delay < 15. All-source results count raw rows; accepted results use original batch dispositions. This is source-input accounting, not a held-out check.",
         },
         "holdout_checks": checks,
+        "timezone_offset_transitions": timezone_offset_coverage(report, airport_timezones),
         "source_status_counts": {field: dict(values) for field, values in status_counts.items()},
         "normalizer_issue_counts": dict(sorted(issues.items())),
         "normalizer_issue_examples": issue_examples,

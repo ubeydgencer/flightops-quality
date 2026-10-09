@@ -1,5 +1,47 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.3 spring-transition source cohort
+
+- **189 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS. The same
+  suite is also run from fresh wheel installations outside the checkout before
+  publication.
+- March 2025 source evidence scans 600,872 rows and retains all 3,079 JFK/LAX/ORD
+  observations. No original row is quarantined or repeated. Each held-out field
+  matches 3,061 comparable observations; nine cancelled and nine diverted rows
+  are explicit exclusions, not matches. Accepted arrival coverage is 100%; OTP
+  is 84.4169% with 2,584 on-time and 477 late observations.
+- Derived endpoint coverage compares each airport zone with itself over accepted
+  unique flight windows. Scheduled windows include cancellation/diversion;
+  actual windows use normal flights. The observed changes affect 15 scheduled
+  windows / 23 zone observations and 18 actual windows / 25 zone observations.
+  A separate count using the dated IANA transition instants agrees with all four
+  counts; this still depends on the normalized UTC instants.
+- Synthetic tests cover spring/fall signed changes, repeated zones, static
+  differences between airports, missing endpoints, status/duplicate/quarantine
+  populations, bounded examples, invalid maps, naive/reversed timestamps and
+  UTC/local representation limits. Endpoint comparison does not detect offset
+  changes that compensate inside a longer window.
+- HTML tests reject present-null coverage, inconsistent sample/count bounds and
+  repeated example identities while allowing distinct records to share a source
+  row reference. Source strings remain escaped. The new section was inspected
+  at 1280 px and 390 px with no page overflow, CSP errors or remote requests.
+- Official FAA February/March cycles and pinned IANA 2025a rules document the
+  curated map. The recorded producer uses tzdata 2025.1 with no system search
+  paths. January JSON remains byte-for-byte unchanged and its earlier producer
+  metadata is preserved.
+
+Ruff and Bandit passed with no findings. The audited development dependencies
+had no known advisories; the local v0.2.2 editable metadata was skipped because
+it was unavailable on PyPI. No new mandatory runtime dependencies were introduced.
+Hosted GitHub Actions and PyPI publication remain unavailable with current
+access. Package metadata, source content and public asset digests are checked
+before and after publication.
+
+The [dated March method and results](bts-2025-03-route-cohort.md) and
+[machine-readable evidence](evidence/bts-2025-03-route-cohort.json) record the
+scope. No absolute UTC ground truth, all-airport validation or flight-safety
+certification is claimed. The core API and row ruleset 0.1.1 remain unchanged.
+
 ## v0.2.2 offline benchmark report
 
 - **166 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS, both from
