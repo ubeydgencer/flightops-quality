@@ -86,6 +86,27 @@ This three-entry review does not establish a general historical airport catalog.
 | [FAA 23 January 2025 APT ZIP](https://nfdc.faa.gov/webContent/28DaySub/extra/23_Jan_2025_APT_CSV.zip) | `009b04926e187628fd1560eb8b6925012f0a1aeb855a9c9653eff61fddac9df0` |
 | IANA 2025a `northamerica` | `bb441456077da404a1997a50abfee95ac11937d9c28278cfe36f85277227c1f1` |
 
+## View the recorded evidence
+
+Render the committed JSON evidence as a static HTML report:
+
+```bash
+python examples/bts_validation_html.py \
+  --input docs/evidence/bts-2025-01-route-cohort.json \
+  --output bts-report.html
+```
+
+Open `bts-report.html` in a browser. The report works offline, uses no JavaScript
+or remote fonts, and shows the archive/mapping hashes, source period and recorded
+environment alongside dispositions, held-out comparisons and their exclusion
+populations. It includes the original clock findings and keeps source-input OTP
+separate from accepted-cohort OTP. The source JSON remains the machine-readable
+evidence; rendering it does not rerun normalization or validate a new dataset.
+
+Choose a new output filename. The renderer publishes the complete HTML privately
+and atomically, refuses to overwrite an existing destination, and reports invalid
+input or output errors clearly.
+
 ## Reproduction
 
 Run from the repository root after installing the package. Download the specified
@@ -110,14 +131,15 @@ PYTHONTZPATH='' python examples/validate_bts_month.py \
   --output bts-validation-2025-01
 ```
 
-Choose a new output directory. The result contains `validation.json` and
-`cohort.csv`. Keep those artifacts together with the original archive and the
-runtime environment for repeatable analysis. The versioned aggregate evidence
+Choose a new output directory. The result contains `validation.json`,
+`validation.html` and `cohort.csv`. Keep those artifacts together with the original
+archive and runtime environment for repeatable analysis. The versioned aggregate evidence
 is retained in [the January route-cohort JSON](evidence/bts-2025-01-route-cohort.json).
 `--source-url` records a provenance label; it does not initiate a download.
 
-The recorded run used CPython **3.12.14** on macOS and `tzdata==2025.1`, which
-contains IANA **2025a**. Select the same Python environment for replay.
+The recorded v0.2.1 benchmark used CPython **3.12.14** on macOS and
+`tzdata==2025.1`, which contains IANA **2025a**. Select the same Python environment
+for replay.
 The [tzdata release notes](https://github.com/python/tzdata/blob/master/NEWS.md)
 document that package-to-IANA release relationship.
 `PYTHONTZPATH=''` makes the system search path empty so ZoneInfo uses the pinned

@@ -22,6 +22,7 @@ from urllib.parse import urlsplit
 from zoneinfo import TZPATH, ZoneInfo
 
 from bts_validation import validate_rows
+from bts_validation_html import render_validation_html
 from flightops_quality import __version__
 from flightops_quality.cli import (
     _private_text_file, _publish_directory, _read_bounded, _unique_json_object,
@@ -194,7 +195,13 @@ def publish(document, rows, headers, destination):
                     "source_line_field": SOURCE_LINE_FIELD,
                     "note": "Added source line metadata is excluded from normalization and duplicate fingerprints."}}
         with _private_text_file(staging / "validation.json") as handle:
-            handle.write(json.dumps(document, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
+            json_text = json.dumps(document, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+            handle.write(json_text)
+        # Bind the visual report to the bytes actually written on this platform.
+        json_hash = hashlib.sha256((staging / "validation.json").read_bytes()).hexdigest()
+        html = render_validation_html(document, input_sha256=json_hash)
+        with _private_text_file(staging / "validation.html") as handle:
+            handle.write(html)
         _publish_directory(staging, destination)
     finally:
         if staging.exists():

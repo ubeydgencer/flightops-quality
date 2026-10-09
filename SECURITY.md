@@ -42,6 +42,13 @@ There is no guaranteed response deadline for this independently maintained proje
   private directory with mode 0700 on POSIX, then publishes with an exclusive
   rename. Missing native support fails without a partial final audit. Use
   appropriate access controls and retention when moving or sharing reports.
+- The benchmark HTML viewer accepts at most 2 MiB of JSON, rejects duplicate keys
+  and inconsistent count/percentage populations, and escapes every displayed
+  source value. Its CSP permits only the fixed stylesheet by hash; no scripts,
+  remote assets or source-URL links are included. Standalone HTML publication
+  uses a private staged file and exclusive hard link; that filesystem operation
+  must be supported. The view records its input-byte hash but does not authenticate
+  the JSON's author or rerun flight normalization.
 - The SQLite example binds all input values as SQL parameters. It creates a new
   private staged database and publishes without replacing an existing path only
   after inserts and the metric query succeed. A failed quality gate blocks

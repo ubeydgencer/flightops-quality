@@ -178,3 +178,25 @@ doğrudan API kullanan uygulamalar kendi toplam girdi sınırlarını da koymal�
 Tekrar üretilebilir sonuçlar için Python sürümünü, saat dilimi veritabanını ve
 havaalanı eşlemesini sabitleyin. Güven sınırı ve güvenlik bildirimi yöntemi
 [güvenlik politikasında](../SECURITY.md) açıklanır.
+
+### Kaydedilmiş sonuçların HTML raporu
+
+Depodaki JSON kanıtını çevrimdışı bir HTML raporuna dönüştürün:
+
+```bash
+python examples/bts_validation_html.py \
+  --input docs/evidence/bts-2025-01-route-cohort.json \
+  --output bts-report.html
+```
+
+`bts-report.html` dosyasını tarayıcıda açın. Rapor statiktir; JavaScript veya uzak
+sunucudan yazı tipi kullanmaz. Kaynak arşivinin ve saat dilimi eşlemesinin hash
+değerlerini, kaynak dönemini, çalışma ortamını, kayıt durumlarını ve saat
+bulgularını gösterir. Karşılaştırmaya giren kayıtlarla dışlama nedenlerinin
+paydaları ve kaynak grubunun OTP'siyle kabul grubunun OTP'si ayrı tutulur.
+HTML oluşturmak yeni bir veri doğrulaması çalıştırmaz; kaydedilmiş kanıtı sunar.
+
+Yeni bir çıktı dosyası seçin; var olan dosyalar üzerine yazılmaz. Resmî arşivi
+yeniden inceleyen `examples/validate_bts_month.py` komutu da `validation.json` ve
+`cohort.csv` yanında `validation.html` üretir. Gerçek aylık kaynak ve tam kohort
+pakete eklenmez; JSON kanıtında sınırlı bir kaynak bulgusu örneği bulunur.

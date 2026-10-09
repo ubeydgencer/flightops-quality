@@ -216,7 +216,9 @@ class BtsMonthReaderTests(unittest.TestCase):
     def test_publish_artifact_has_lineage_and_complete_csv_hash(self):
         digest, _ = self.write_archive([row()])
         self.assertEqual(self.run_main(digest), 0)
-        self.assertEqual({p.name for p in self.output.iterdir()}, {"cohort.csv", "validation.json"})
+        self.assertEqual({p.name for p in self.output.iterdir()}, {"cohort.csv", "validation.json", "validation.html"})
+        html = (self.output / "validation.html").read_text()
+        self.assertIn(hashlib.sha256((self.output / "validation.json").read_bytes()).hexdigest(), html)
         document = json.loads((self.output / "validation.json").read_text())
         self.assertEqual(document["cohort_artifact"]["sha256"], hashlib.sha256((self.output / "cohort.csv").read_bytes()).hexdigest())
         with (self.output / "cohort.csv").open(newline="") as handle:
@@ -248,6 +250,15 @@ class BtsMonthReaderTests(unittest.TestCase):
                 raise OSError("injected JSON publication failure")
             return original(path)
         with patch.object(READER, "_private_text_file", side_effect=fail_json):
+            with self.assertRaises(SystemExit) as exc:
+                self.run_main(digest)
+        self.assertEqual(exc.exception.code, 2)
+        self.assert_no_output()
+        self.assertEqual(self.run_main(digest), 0)
+
+    def test_html_failure_cannot_publish_json_and_csv_without_the_report(self):
+        digest, _ = self.write_archive([row()])
+        with patch.object(READER, "render_validation_html", side_effect=ValueError("injected rendering failure")):
             with self.assertRaises(SystemExit) as exc:
                 self.run_main(digest)
         self.assertEqual(exc.exception.code, 2)

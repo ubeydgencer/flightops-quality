@@ -1,5 +1,40 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.2 offline benchmark report
+
+- **166 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS, both from
+  source and from fresh wheel installations outside the repository.
+- The static HTML view displays source/selected counts, mutually exclusive status
+  cohorts, raw/accepted/derived OTP populations, held-out comparison exclusions,
+  issue-count units, bounded diagnostic examples and recorded artifact/environment
+  provenance. Empty denominators are unavailable; inconsistent counts or
+  percentages, including a very large integer percentage, produce clear errors.
+- Source fields, metadata, issue text, row references, route/zone keys and hashes
+  have HTML injection regression coverage. URLs remain escaped text; the page
+  contains no scripts or remote assets. Its CSP permits the fixed stylesheet by
+  hash. Desktop (1280 px) and mobile (390 px) views were inspected in headless
+  Chrome; no page overflow, CSP console errors or external network requests were
+  observed. Comparison and diagnostic sections were inspected separately.
+- Standalone JSON input is bounded to 2 MiB and rejects duplicate/deep JSON. Tests
+  cover existing files/directories/dangling links, same input/output, concurrent
+  destination creation, staged write/link failures, descriptor cleanup, retry
+  and private 0600 files even under an unrestricted umask.
+- The archive validator publishes JSON, HTML and cohort CSV together. Injected
+  renderer failure leaves no final directory. Each HTML report records the hash
+  of the actual JSON bytes, including its BOM/whitespace or platform line endings.
+- A pinned installed-wheel replay of the actual January source retained the
+  same source/validation/cohort evidence as v0.2.1, apart from the new producer
+  package version. The checked-in v0.2.1 JSON evidence is unchanged; rendering it
+  is a view of the earlier run, not a new normalization.
+- Ruff and Bandit passed with no findings; audited development dependencies had
+  no known advisories. The local editable project was skipped by the advisory
+  service. Twine metadata, distribution content and public asset hashes are
+  checked for publication. Hosted CI is still unavailable with current access.
+
+The core API and row ruleset 0.1.1 are unchanged. Native output publication and
+browser rendering were exercised on macOS; this is not Windows runtime or
+flight-safety certification.
+
 ## v0.2.1 dated BTS route cohort
 
 - **139 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS, both from

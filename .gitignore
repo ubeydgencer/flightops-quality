@@ -8,3 +8,4 @@ dist/
 example-output*/
 bts-validation*/
 bts-*.zip
+bts-report*.html

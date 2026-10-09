@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.1](https://img.shields.io/badge/Release-0.2.1%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.1)
+[![Alpha 0.2.2](https://img.shields.io/badge/Release-0.2.2%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.2)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -96,6 +96,26 @@ rows, 2,928 are accepted and one is quarantined. Both held-out fields match on
 accounted for separately. The original monthly data and full cohort are not
 bundled; versioned evidence includes a bounded diagnostic source excerpt.
 See [the dated route-cohort recipe, evidence and limits](docs/bts-2025-01-route-cohort.md).
+
+Render the recorded evidence as an offline HTML report:
+
+The [sample report](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.2/bts-2025-01-report.html)
+and its [recorded JSON](https://github.com/ubeydgencer/flightops-quality/releases/download/v0.2.2/bts-2025-01-route-cohort.json)
+are also downloadable release assets. Open the HTML locally; the evidence retains
+its original v0.2.1 producer metadata.
+
+```bash
+python examples/bts_validation_html.py \
+  --input docs/evidence/bts-2025-01-route-cohort.json \
+  --output bts-report.html
+```
+
+Open `bts-report.html` in a browser. It is a static report with no JavaScript or
+remote fonts. Source/mapping hashes, period, runtime, record dispositions,
+held-out comparison counts and exclusions, clock findings and OTP for the source
+and accepted populations remain visible together. Choose a new output filename;
+existing files are preserved. A fresh archive-validation run also produces
+`validation.html` beside its JSON and extracted cohort.
 
 ### Check a batch before warehouse loading
 

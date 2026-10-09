@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.2 — 2026-10-09
+
+- BTS benchmark publication now includes a static offline HTML report alongside
+  JSON and cohort CSV. The three artifacts are published together after rendering
+  succeeds; existing output paths are preserved.
+- The report separates full source scan counts, selected routes, dispositions,
+  source-input OTP, accepted unique metrics and held-out comparison exclusions.
+  Bounded source diagnostics retain original fields and recorded UTC provenance.
+- An independent CLI renders existing benchmark JSON without rerunning its
+  normalization. Input is bounded to 2 MiB, duplicate keys are rejected and
+  contradictory counters or percentages fail visibly. Empty denominators remain
+  unavailable; very large percentage integers produce a clear error.
+- HTML escapes source values, contains no scripts or remote assets and restricts
+  page content with CSP and a hash for the fixed stylesheet. The JSON byte hash
+  is recorded in the view. Standalone files are created privately without
+  replacing prior output, including collision and injected failure cases.
+- The recorded January 2025 evidence remains unchanged and identifies its
+  original v0.2.1 producer. The core API and row ruleset 0.1.1 are unchanged.
+
 ## 0.2.1 — 2026-10-09
 
 - An offline, bounded BTS ZIP validator scans a complete dated source file,
