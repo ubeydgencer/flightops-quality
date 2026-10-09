@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.1 — 2026-10-09
+
+- An offline, bounded BTS ZIP validator scans a complete dated source file,
+  retains all statuses in the mapped route cohort and publishes complete
+  validation/lineage artifacts without replacing prior output.
+- Arrival delay and airborne time are checked with their source fields withheld
+  from a separate normalization probe. Source-input KPI accounting, original
+  batch dispositions and hold-out exclusions remain separate populations.
+- January 2025 JFK/LAX/ORD evidence documents 2,929 source rows: 2,928 accepted,
+  one clock/duration contradiction quarantined and 2,909 matching observations
+  for each held-out metric. A bounded diagnostic excerpt preserves the finding.
+- Dated FAA airport identity, reviewed IANA mapping, pinned timezone runtime,
+  archive/CSV/mapping hashes and replay commands document the benchmark's scope.
+  Bundled CSV fixtures remain synthetic; no whole-month/all-airport or absolute
+  UTC validation is claimed. The library API and row ruleset are unchanged.
+
 ## 0.2.0 — 2026-10-09
 
 - Arrival-delay coverage is reported separately from arrival OTP, with explicit

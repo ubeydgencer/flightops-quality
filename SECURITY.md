@@ -25,6 +25,14 @@ There is no guaranteed response deadline for this independently maintained proje
   are created; raise configurable limits deliberately for trusted batches.
 - Timezone maps reject duplicate JSON keys. Source-file hashes and parsing use
   the same bounded byte snapshot.
+- The offline BTS benchmark snapshots at most 64 MiB of ZIP bytes, requires an
+  expected SHA-256 and reads a single CSV without extracting archive paths.
+  Decompressed bytes (512 MiB), source rows (1 million), retained rows (20,000),
+  cells (2 million) and retained UTF-8 values (64 MiB) are bounded separately.
+  Wrong periods, malformed rows, CRC failures or exceeded bounds prevent output
+  publication. A source URL is a label; it initiates no network request. Generated
+  cohort CSVs preserve source values; use an importer that treats them as text
+  rather than executing spreadsheet formulas in untrusted input.
 - API raw data is copied recursively, with string keys at every level, valid
   UTF-8 strings, finite numeric values, at most 32 nesting levels and integers
   of at most 4096 bits. Cycles and non-JSON objects fail with `ValueError`.

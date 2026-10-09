@@ -1,5 +1,5 @@
 """Explainable quality checks for flight operations data."""
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 from .batch import analyze_records, analyze_results
 from .gates import QualityPolicy, evaluate_quality

@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.0](https://img.shields.io/badge/Release-0.2.0%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.0)
+[![Alpha 0.2.1](https://img.shields.io/badge/Release-0.2.1%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.1)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -19,7 +19,7 @@ Turn local flight clocks and messy source records into UTC observations,
 explainable findings and auditable metrics. Designed as a small Python layer
 between raw operational data and an analytics warehouse.
 
-> **Batch alpha.** All bundled flights are synthetic. Independent project;
+> **Batch alpha.** All bundled CSV fixtures are synthetic. Independent project;
 > no airline affiliation, production deployment or standards certification.
 
 ## What it handles
@@ -84,6 +84,18 @@ Raw official airport/carrier IDs remain visible in the audit.
 
 On a system without an IANA database, install `python -m pip install '.[timezone]'`.
 Pin Python, the timezone database and the mapping to reproduce historical analysis.
+
+### Dated real-source validation
+
+An offline benchmark selects all January 2025 BTS source rows whose origin and
+destination are both JFK, LAX or ORD. It preserves the source fields and positions,
+checks the downloaded archive's SHA-256 and separates source-input KPI parity
+from held-out reconstruction of arrival delay and airborne time. Of 2,929 selected
+rows, 2,928 are accepted and one is quarantined. Both held-out fields match on
+2,909 comparable rows; cancellations, diversions and a clock-inconsistent row are
+accounted for separately. The original monthly data and full cohort are not
+bundled; versioned evidence includes a bounded diagnostic source excerpt.
+See [the dated route-cohort recipe, evidence and limits](docs/bts-2025-01-route-cohort.md).
 
 ### Check a batch before warehouse loading
 
@@ -262,6 +274,6 @@ CI badge is claimed.
 [Turkish usage guide](docs/guide-tr.md)
 
 The MIT license covers this project's code and original synthetic fixtures.
-Upstream data and specifications retain their own terms. The next useful step is
-validation against one dated real BTS month, followed by consumer feedback on
-optional columnar exports and provider schemas.
+Upstream data and specifications retain their own terms. Broader validation
+across airports, periods and consumer feeds remains a next step, alongside
+feedback on optional columnar exports and provider schemas.

@@ -1,5 +1,39 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.1 dated BTS route cohort
+
+- **139 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS, both from
+  source and with a freshly installed wheel outside the repository.
+- The complete January 2025 Reporting Carrier source was scanned and hashed:
+  539,747 rows, 243,177,378 decompressed bytes. The preselected JFK/LAX/ORD route
+  cohort retains 2,929 source rows, including cancellation and diversion.
+- One original batch produces 2,928 accepted rows, one quarantined clock/duration
+  contradiction and no exact repeats. Two fields are withheld from a separate
+  probe: each of arrival delay and airborne minutes matches 2,909 of 2,909
+  comparable source observations. Each check also accounts for 11 cancellations,
+  eight diversions and the one clock contradiction; none are counted as matches.
+- The pinned replay uses tzdata 2025.1 / IANA 2025a with an empty system search
+  path. A clean installed-wheel replay produced exactly the same complete JSON
+  evidence and extracted-cohort hash as the recorded source run.
+- Source-input OTP uses original signed ArrDelay and records raw-row and accepted
+  unique denominators separately. Tests preserve a real missing-target parity
+  difference while preventing a false mismatch caused by percentage rounding.
+- Archive/CSV checksums and CRC, wrong periods outside the selected cohort,
+  malformed headers/rows, trailing unnamed export columns, decompression bounds,
+  source/cohort/cell/UTF-8 limits and atomic output failures have regression tests.
+  Scheduled midnight and DST folds are never guessed by the benchmark.
+- Ruff passed; Bandit reported no findings in `src` and `examples`. The audited
+  development dependencies had no known advisories; the local editable package
+  was skipped by the advisory service. The core has no mandatory dependencies.
+- Distribution metadata passed Twine checks. Release artifacts are checked
+  against source content, then verified by SHA-256 after public download.
+
+The [dated recipe, source provenance and observed results](bts-2025-01-route-cohort.md)
+and [machine-readable evidence](evidence/bts-2025-01-route-cohort.json) describe
+the exact cohort. This is provider-field consistency evidence, not independent
+ground truth for absolute UTC dates, full-month/all-airport validation or hosted
+CI. The library API and row ruleset remain unchanged; the ruleset is 0.1.1.
+
 ## v0.2.0 batch quality gates and warehouse integrity
 
 - **96 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
@@ -83,8 +117,8 @@ CSV and output preservation.
 
 ## Boundaries of this evidence
 
-These are synthetic fixtures and local batch tests. They do not establish
-accuracy on a complete historical BTS release, airline production readiness,
+Synthetic fixtures and local batch tests are supplemented by the dated route
+cohort above. They do not establish accuracy on a complete historical BTS release, airline production readiness,
 performance at large scale, Windows behavior or standards certification.
 The reference workflow in `docs/ci.yml` is provided separately; its presence is
 not evidence that hosted CI has run. Hosted workflow results, if enabled, should

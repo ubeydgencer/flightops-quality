@@ -158,9 +158,18 @@ arasında tutarlılık sağlayın.
 
 ## Doğrulama ve kapsam
 
-Bu sürüm, sentetik uç durumlarla sınanmış bir toplu işleme alpha sürümüdür.
-Tam bir tarihli BTS ayı veya bir havayolunun üretim veri akışıyla henüz
-doğrulanmamıştır. Testlerin ve dağıtım kontrollerinin sürüm bazında sonuçları
+Bu sürüm, sentetik uç durum testlerine ek olarak BTS'nin Ocak 2025 dosyasındaki
+JFK, LAX ve ORD arasındaki 2.929 kaynak kaydıyla sınanmış bir toplu işleme alpha
+sürümüdür. 2.928 kayıt kabul edilmiş, saat ve süre alanları çelişen bir kayıt
+karantinaya alınmıştır. Varış gecikmesi ve havada kalma süresi karşılaştırmasına
+giren 2.909 kayıtta kaynakla eşleşme görülmüştür; 11 iptal, 8 diversion ve bir
+saat çelişkisi açık dışlama nedenleriyle raporlanmıştır.
+
+[Tarihli kaynak, tekrar çalıştırma komutu ve sonuçlar](bts-2025-01-route-cohort.md)
+ayrı belgede yer alır. Bu çalışma ayın bütün havaalanlarını, mutlak UTC
+tarihlerinin bağımsız doğruluğunu veya bir havayolunun üretim verisini
+doğrulamaz. Paketle gelen CSV örnekleri sentetiktir; gerçek kaynak dosyası ayrıca
+indirilir. Testlerin ve dağıtım kontrollerinin sürüm bazında sonuçları
 [doğrulama belgesinde](validation.md), teknik sınırlar [tasarım belgesinde](design.md)
 yer alır.
 

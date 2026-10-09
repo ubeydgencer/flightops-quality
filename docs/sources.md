@@ -10,6 +10,8 @@ data quality, not operational certification.
 - [BTS 2026 Technical Directive #40](https://www.bts.gov/explore-topics-and-geography/modes/aviation/number-40-technical-directive-reporting-time):
   local HHMM clocks, midnight `2400`, and cancellation after gate return. A
   cancelled flight can legitimately report actual gate departure.
+- [BTS 2025 Technical Directive #39](https://www.bts.gov/explore-topics-and-geography/modes/aviation/number-39-technical-directive-reporting-time):
+  reporting definitions for the January 2025 real-source route cohort.
 - [EUROCONTROL A-CDM specification, 2025](https://www.eurocontrol.int/publication/eurocontrol-specification-airport-collaborative-decision-making-cdm):
   vocabulary distinguishing gate/block, runway, actual and target times. This
   package does not implement the full A-CDM specification or claim compliance.
@@ -25,7 +27,11 @@ for their release, rather than claiming that either date policy was validated.
 
 ## Data and licensing
 
-Bundled CSVs were written for this project and contain no real flight records.
+Bundled CSV fixtures were written for this project and contain no real flight records.
+The [January 2025 route-cohort evidence](bts-2025-01-route-cohort.md) records a
+separate real-source validation, with aggregate results and one bounded source
+excerpt explaining a quarantined row. The full monthly source and extracted
+cohort are downloaded/generated locally and are not bundled.
 The [data.gov BTS Flight Data metadata](https://catalog.data.gov/dataset/bts-flight-data)
 points to [US government works](https://www.usa.gov/government-works); it does not
 label the dataset CC0. Users should check the actual source file and terms,

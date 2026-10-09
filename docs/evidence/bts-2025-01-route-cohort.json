@@ -1,0 +1,408 @@
+{
+  "schema_version": "1",
+  "source": {
+    "archive_name": "bts-2025-01.zip",
+    "archive_sha256": "868387dcedaef1b8d8392e608e642219fde50d594c3cf2094aec858167629ccf",
+    "archive_bytes": 27108664,
+    "csv_member": "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2025_1.csv",
+    "csv_sha256": "d7c7d59452cad1215d9605e8ff350a4bad7282750765084fe57928a5ad275453",
+    "csv_bytes": 243177378,
+    "source_rows_scanned": 539747,
+    "columns": 110,
+    "source_date_range": {
+      "start": "2025-01-01",
+      "end": "2025-01-31"
+    },
+    "period": "2025-01",
+    "source_url_label": "https://www.transtats.bts.gov/PREZIP/On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2025_1.zip"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "system": "Darwin",
+    "package_version": "0.2.1",
+    "ruleset_version": "0.1.1",
+    "tzdata_package_version": "2025.1",
+    "tzdata_iana_version": "2025a",
+    "timezone_system_search_paths": [],
+    "timezone_note": "ZoneInfo uses system search paths first. Set PYTHONTZPATH='' and pin tzdata for replay."
+  },
+  "cohort": {
+    "airport_codes": [
+      "JFK",
+      "LAX",
+      "ORD"
+    ],
+    "airport_timezones": {
+      "JFK": "America/New_York",
+      "LAX": "America/Los_Angeles",
+      "ORD": "America/Chicago"
+    },
+    "timezone_mapping_sha256": "22d092c690ba02f79b19424966faae4e238ba73ab17dac3da237f004ec9931f1",
+    "predicate": "Origin and Dest both belong to the timezone mapping keys; all statuses retained.",
+    "truncated": false,
+    "full_cohort_bundled": false,
+    "diagnostic_source_excerpts": true
+  },
+  "limits": {
+    "archive_bytes": 67108864,
+    "csv_bytes": 536870912,
+    "source_rows": 1000000,
+    "cohort_rows": 20000,
+    "cohort_cells": 2000000,
+    "cohort_value_bytes": 67108864,
+    "columns": 256
+  },
+  "validation": {
+    "input_rows": 2929,
+    "batch_summary": {
+      "counts": {
+        "input": 2929,
+        "accepted": 2928,
+        "quarantined": 1,
+        "duplicates": 0
+      },
+      "issue_counts": {
+        "BTS_CLOCK_MISMATCH": 3
+      },
+      "accepted_population": {
+        "flights": 2928,
+        "cancelled": 11,
+        "diverted": 8,
+        "cancellation_rate_percent": 0.3756830601092896,
+        "diversion_rate_percent": 0.273224043715847
+      },
+      "arrival_otp_15_completed": {
+        "eligible": 2909,
+        "coverage_population": 2909,
+        "coverage_percent": 100.0,
+        "on_time": 2510,
+        "late": 399,
+        "percent": 86.28394637332417,
+        "excluded_cancelled_or_diverted": 19,
+        "excluded_missing_arrival_delay": 0,
+        "policy": "Accepted unique, non-cancelled, non-diverted flights with valid arrival delay; delay < 15 minutes."
+      }
+    },
+    "group_dispositions": {
+      "input": 2929,
+      "accepted": 2928,
+      "quarantined": 1,
+      "duplicates": 0
+    },
+    "source_input_kpis": {
+      "all_source_rows": {
+        "input_rows": 2929,
+        "coverage_population": 2910,
+        "eligible": 2910,
+        "on_time": 2510,
+        "late": 400,
+        "percent": 86.25429553264605,
+        "coverage_percent": 100.0,
+        "excluded_counts": {
+          "cancelled_or_diverted": 19
+        }
+      },
+      "accepted_unique_rows": {
+        "input_rows": 2928,
+        "coverage_population": 2909,
+        "eligible": 2909,
+        "on_time": 2510,
+        "late": 399,
+        "percent": 86.28394637332417,
+        "coverage_percent": 100.0,
+        "excluded_counts": {
+          "cancelled_or_diverted": 19
+        }
+      },
+      "accepted_parity": {
+        "eligible": {
+          "source": 2909,
+          "derived": 2909,
+          "matched": true
+        },
+        "coverage_population": {
+          "source": 2909,
+          "derived": 2909,
+          "matched": true
+        },
+        "on_time": {
+          "source": 2510,
+          "derived": 2510,
+          "matched": true
+        },
+        "late": {
+          "source": 399,
+          "derived": 399,
+          "matched": true
+        },
+        "percent": {
+          "source": 86.28394637332417,
+          "derived": 86.28394637332417,
+          "matched": true
+        },
+        "coverage_percent": {
+          "source": 100.0,
+          "derived": 100.0,
+          "matched": true
+        }
+      },
+      "policy": "Original signed ArrDelay, strict delay < 15. All-source results count raw rows; accepted results use original batch dispositions. This is source-input accounting, not a held-out check."
+    },
+    "holdout_checks": {
+      "ArrDelay": {
+        "metric": "arrival_delay_minutes",
+        "checked": 2909,
+        "matched": 2909,
+        "mismatched": 0,
+        "excluded_counts": {
+          "cancelled": 11,
+          "diverted": 8,
+          "probe_clock_mismatch": 1
+        },
+        "mismatch_examples": [],
+        "input_rows": 2929,
+        "reconciled": true
+      },
+      "AirTime": {
+        "metric": "airborne_minutes",
+        "checked": 2909,
+        "matched": 2909,
+        "mismatched": 0,
+        "excluded_counts": {
+          "cancelled": 11,
+          "diverted": 8,
+          "probe_clock_mismatch": 1
+        },
+        "mismatch_examples": [],
+        "input_rows": 2929,
+        "reconciled": true
+      }
+    },
+    "source_status_counts": {
+      "Cancelled": {
+        "0": 2918,
+        "1": 11,
+        "invalid": 0
+      },
+      "Diverted": {
+        "0": 2921,
+        "1": 8,
+        "invalid": 0
+      },
+      "cohorts": {
+        "normal": 2910,
+        "cancelled_only": 11,
+        "diverted_only": 8,
+        "cancelled_and_diverted": 0,
+        "invalid_status": 0
+      }
+    },
+    "normalizer_issue_counts": {
+      "BTS_CLOCK_MISMATCH": 1
+    },
+    "normalizer_issue_examples": [
+      {
+        "source_row_number": 441440,
+        "raw_sha256": "270e4bf7e59be59ae9d4d3052d5c7c70e783ebb7a89c77cf5e2b4382cf985b19",
+        "source": "bts",
+        "record_id": "[\"2025-01-10\",\"19790\",\"960\",\"12892\",\"12478\",1270]",
+        "issues": [
+          {
+            "code": "BTS_CLOCK_MISMATCH",
+            "severity": "error",
+            "fields": [
+              "CRSArrTime"
+            ],
+            "message": "Local clock disagrees with the timestamp derived from signed delay/elapsed evidence."
+          },
+          {
+            "code": "BTS_CLOCK_MISMATCH",
+            "severity": "error",
+            "fields": [
+              "ArrTime"
+            ],
+            "message": "Local clock disagrees with the timestamp derived from signed delay/elapsed evidence."
+          },
+          {
+            "code": "BTS_CLOCK_MISMATCH",
+            "severity": "error",
+            "fields": [
+              "WheelsOn"
+            ],
+            "message": "Local clock disagrees with the timestamp derived from signed delay/elapsed evidence."
+          }
+        ],
+        "raw_fields": {
+          "FlightDate": "2025-01-10",
+          "Reporting_Airline": "DL",
+          "DOT_ID_Reporting_Airline": "19790",
+          "Flight_Number_Reporting_Airline": "960",
+          "Origin": "LAX",
+          "OriginAirportID": "12892",
+          "OriginAirportSeqID": "1289208",
+          "Dest": "JFK",
+          "DestAirportID": "12478",
+          "DestAirportSeqID": "1247805",
+          "Tail_Number": "N191DN",
+          "Cancelled": "0.00",
+          "Diverted": "0.00",
+          "CRSDepTime": "2110",
+          "CRSArrTime": "0525",
+          "DepTime": "2248",
+          "ArrTime": "0747",
+          "WheelsOff": "0005",
+          "WheelsOn": "0740",
+          "CRSElapsedTime": "317.00",
+          "DepDelay": "98.00",
+          "ActualElapsedTime": "361.00",
+          "TaxiOut": "77.00",
+          "TaxiIn": "7.00",
+          "AirTime": "277.00",
+          "ArrDelay": "142.00"
+        },
+        "flight": {
+          "source": "bts",
+          "record_id": "[\"2025-01-10\",\"19790\",\"960\",\"12892\",\"12478\",1270]",
+          "carrier": "DL",
+          "flight_number": "960",
+          "origin": "LAX",
+          "destination": "JFK",
+          "aircraft_registration": "N191DN",
+          "cancelled": false,
+          "diverted": false,
+          "service_date": "2025-01-10",
+          "sobt": "2025-01-11T05:10:00+00:00",
+          "sibt": "2025-01-11T10:27:00+00:00",
+          "aobt": "2025-01-11T06:48:00+00:00",
+          "aibt": "2025-01-11T12:49:00+00:00",
+          "atot": "2025-01-11T08:05:00+00:00",
+          "aldt": "2025-01-11T12:42:00+00:00",
+          "provenance": {
+            "sobt": [
+              "FlightDate",
+              "CRSDepTime",
+              "Origin",
+              "airport_timezones"
+            ],
+            "sibt": [
+              "FlightDate",
+              "CRSDepTime",
+              "Origin",
+              "CRSElapsedTime",
+              "airport_timezones"
+            ],
+            "aobt": [
+              "FlightDate",
+              "CRSDepTime",
+              "Origin",
+              "DepDelay",
+              "airport_timezones"
+            ],
+            "atot": [
+              "aobt",
+              "TaxiOut"
+            ],
+            "aibt": [
+              "aobt",
+              "ActualElapsedTime"
+            ],
+            "aldt": [
+              "aibt",
+              "TaxiIn"
+            ]
+          }
+        }
+      }
+    ],
+    "unresolved_counts": {},
+    "source_missing_fields": {
+      "ActualElapsedTime": 19,
+      "AirTime": 19,
+      "ArrDelay": 19,
+      "ArrTime": 11,
+      "DepDelay": 11,
+      "DepTime": 11,
+      "TaxiIn": 11,
+      "TaxiOut": 11,
+      "WheelsOff": 11,
+      "WheelsOn": 11
+    },
+    "route_counts": {
+      "JFK-LAX": 772,
+      "JFK-ORD": 171,
+      "LAX-JFK": 775,
+      "LAX-ORD": 519,
+      "ORD-JFK": 172,
+      "ORD-LAX": 520
+    },
+    "date_range": {
+      "start": "2025-01-01",
+      "end": "2025-01-31",
+      "valid_rows": 2929,
+      "invalid_rows": 0
+    },
+    "airport_ids": {
+      "JFK": {
+        "airport_ids": [
+          "12478"
+        ],
+        "airport_sequence_ids": [
+          "1247805"
+        ],
+        "observations": {
+          "Dest": 947,
+          "Origin": 943
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      },
+      "LAX": {
+        "airport_ids": [
+          "12892"
+        ],
+        "airport_sequence_ids": [
+          "1289208"
+        ],
+        "observations": {
+          "Dest": 1292,
+          "Origin": 1294
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      },
+      "ORD": {
+        "airport_ids": [
+          "13930"
+        ],
+        "airport_sequence_ids": [
+          "1393008"
+        ],
+        "observations": {
+          "Dest": 690,
+          "Origin": 692
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      }
+    },
+    "policy": {
+      "scope": "Every caller-supplied source row; no sampling or status selection in this helper.",
+      "holdouts": "ArrDelay and AirTime are withheld only in a separate probe; original rows determine batch dispositions.",
+      "tolerance_minutes": 0,
+      "midnight_policy": null,
+      "departure_fold": null,
+      "absolute_utc_validation": false,
+      "duplicate_policy": "Hold-outs account for every source row; batch KPIs use original accepted unique flights.",
+      "missing_policy": "Never derive dates or durations from clock order; source-clock absence is reported separately.",
+      "reconstruction_checks": "Input-derived DepDelay, ActualElapsedTime and taxi KPI equalities are not claimed as independent hold-outs.",
+      "issue_count_unit": "Source rows containing a code, before batch duplicate/conflict findings.",
+      "exclusion_priority": "invalid/cancelled/diverted status, missing/invalid target, probe error, missing prediction."
+    }
+  },
+  "cohort_artifact": {
+    "name": "cohort.csv",
+    "sha256": "41fe02a659c4d039ef4859764f5f2836da7bfeb02c0054d15624072f3a19b847",
+    "source_line_field": "_source_line_number",
+    "note": "Added source line metadata is excluded from normalization and duplicate fingerprints."
+  }
+}
