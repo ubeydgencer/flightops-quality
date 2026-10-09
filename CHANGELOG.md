@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.4 — 2026-10-09
+
+- A third dated BTS benchmark covers November 2025 and the US autumn timezone
+  transition: 570,550 source rows scanned and all 3,246 selected JFK/LAX/ORD
+  observations retained. The original batch accepts 3,245 rows and quarantines
+  one repeated-hour scheduled departure without an explicit fold choice.
+- Each held-out field matches all 3,152 comparable observations. The 87 cancelled,
+  six diverted and one ambiguous-anchor row are explicit exclusions. Source-input
+  and accepted OTP populations remain distinct, including the unresolved row's
+  original signed arrival-delay label.
+- Derived endpoint coverage records 16 scheduled windows / 23 zone observations
+  and 14 actual windows / 20 observations with backward offset changes. Official
+  dated FAA snapshots, IANA rules, raw diagnostic excerpt and checksums document
+  the scope. Complete January and March JSON evidence remains unchanged.
+- Regression tests show that a unique scheduled anchor and signed departure delay
+  resolve both occurrences of the same actual local clock. An ambiguous
+  scheduled departure remains quarantined even when target values are present.
+  The real ambiguous source excerpt and negative-offset HTML report are also
+  covered; synthetic fold coverage is distinguished from observed source data.
+- The core API, normalization rules and row ruleset 0.1.1 are unchanged.
+
 ## 0.2.3 — 2026-10-09
 
 - A second dated BTS benchmark covers March 2025 and the US spring timezone

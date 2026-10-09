@@ -6,6 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 from test_bts import ZONES, bts_row
 
@@ -94,6 +95,88 @@ class BtsValidationTests(unittest.TestCase):
         self.assertEqual(result["unresolved_counts"]["TIME_AMBIGUOUS"], 1)
         for check in result["holdout_checks"].values():
             self.assertEqual(check["excluded_counts"], {"dst_ambiguous": 1})
+
+    def test_unique_schedule_and_signed_delay_resolve_actual_repeated_clock_without_a_fold_guess(self):
+        # LAX falls back at 2025-11-02 09:00 UTC. The unique 23:30 PDT
+        # schedule anchor is 06:30 UTC; +120 and +180 minutes reach the two
+        # distinct occurrences of 01:30 despite identical reported clocks.
+        for delay, arrival, wheels_on, utc_start, utc_end, fold, changed in (
+            ("120", "0630", "0620", "08:30", "11:30", 0, 1),
+            ("180", "0730", "0720", "09:30", "12:30", 1, 0),
+        ):
+            with self.subTest(departure_delay=delay, actual_fold=fold):
+                row = {**bts_row(), "FlightDate": "2025-11-01", "Origin": "LAX", "Dest": "JFK",
+                       "CRSDepTime": "2330", "CRSArrTime": "0430", "CRSElapsedTime": "180",
+                       "DepTime": "0130", "DepDelay": delay, "ArrTime": arrival, "ArrDelay": delay,
+                       "ActualElapsedTime": "180", "TaxiOut": "20", "TaxiIn": "10",
+                       "WheelsOff": "0150", "WheelsOn": wheels_on, "AirTime": "150"}
+                expected_raw = copy.deepcopy(row)
+                result = self.validate(row)
+                self.assertEqual(result["group_dispositions"],
+                                 {"input": 1, "accepted": 1, "quarantined": 0, "duplicates": 0})
+                self.assertEqual(result["normalizer_issue_counts"], {})
+                self.assertIsNone(result["policy"]["departure_fold"])
+                for check in result["holdout_checks"].values():
+                    self.assertEqual((check["checked"], check["matched"], check["mismatched"]), (1, 1, 0))
+                    self.assertEqual(check["excluded_counts"], {})
+                self.assertTrue(all(item["matched"] for item in result["source_input_kpis"]["accepted_parity"].values()))
+                coverage = result["timezone_offset_transitions"]
+                self.assertFalse(coverage["policy"]["absolute_utc_validation"])
+                self.assertEqual(coverage["scheduled"]["offset_change_rows"], 1)
+                actual = coverage["actual"]
+                self.assertEqual((actual["population_rows"], actual["checked"], actual["offset_change_rows"],
+                                  actual["zone_change_observations"]), (1, 1, changed, changed))
+                if changed:
+                    example = actual["examples"][0]
+                    self.assertEqual(example["source_row_number"], 2)
+                    self.assertEqual(example["service_date"], "2025-11-01")
+                    self.assertEqual(example["route"], "LAX-JFK")
+                    self.assertEqual(example["window_start_utc"], f"2025-11-02T{utc_start}:00+00:00")
+                    self.assertEqual(example["window_end_utc"], f"2025-11-02T{utc_end}:00+00:00")
+                    self.assertEqual(example["changes"], [{
+                        "timezone": "America/Los_Angeles", "offset_start_seconds": -25200,
+                        "offset_end_seconds": -28800, "change_seconds": -3600,
+                        "local_start": "2025-11-02T01:30:00-07:00", "local_end": "2025-11-02T03:30:00-08:00",
+                    }])
+                else:
+                    self.assertEqual(actual["examples"], [])
+                # Verify the exact derived instant/provenance as well as summary
+                # parity: a local clock alone cannot choose either occurrence.
+                original = VALIDATION.normalize_bts_row(row, ZONES, row_number=2)
+                self.assertTrue(original.accepted)
+                self.assertEqual(original.flight.aobt.isoformat(), f"2025-11-02T{utc_start}:00+00:00")
+                self.assertEqual(original.flight.aibt.isoformat(), f"2025-11-02T{utc_end}:00+00:00")
+                self.assertEqual(original.flight.aobt.astimezone(ZoneInfo(ZONES["LAX"])).fold, fold)
+                self.assertIn("DepDelay", original.flight.provenance["aobt"])
+                self.assertNotIn("departure_fold", original.flight.provenance["sobt"])
+                self.assertEqual(row, expected_raw)
+
+    def test_november_ambiguous_schedule_is_quarantined_and_cannot_enter_timezone_coverage(self):
+        # These clocks/durations fit the first LAX 01:30 occurrence, but the
+        # validation contract does not infer a schedule fold from arrival data.
+        row = {**bts_row(), "FlightDate": "2025-11-02", "Origin": "LAX", "Dest": "JFK",
+               "CRSDepTime": "0130", "CRSArrTime": "0630", "CRSElapsedTime": "180",
+               "DepTime": "0130", "DepDelay": "0", "ArrTime": "0630", "ArrDelay": "0",
+               "ActualElapsedTime": "180", "TaxiOut": "20", "TaxiIn": "10",
+               "WheelsOff": "0150", "WheelsOn": "0620", "AirTime": "150"}
+        result = self.validate(row)
+        self.assertEqual(result["group_dispositions"],
+                         {"input": 1, "accepted": 0, "quarantined": 1, "duplicates": 0})
+        self.assertEqual(result["unresolved_counts"]["TIME_AMBIGUOUS"], 1)
+        self.assertIsNone(result["policy"]["departure_fold"])
+        for check in result["holdout_checks"].values():
+            self.assertEqual((check["checked"], check["matched"], check["mismatched"]), (0, 0, 0))
+            self.assertEqual(check["excluded_counts"], {"dst_ambiguous": 1})
+        for window in ("scheduled", "actual"):
+            item = result["timezone_offset_transitions"][window]
+            self.assertEqual((item["population_rows"], item["checked"], item["offset_change_rows"],
+                              item["zone_change_observations"]), (0, 0, 0, 0))
+            self.assertEqual(item["examples"], [])
+        example = result["normalizer_issue_examples"][0]
+        self.assertIsNone(example["flight"]["sobt"])
+        self.assertIsNone(example["flight"]["aobt"])
+        ambiguity = next(issue for issue in example["issues"] if issue["code"] == "TIME_AMBIGUOUS")
+        self.assertEqual(ambiguity["fields"], ["FlightDate", "CRSDepTime", "Origin"])
 
     def test_original_duplicates_and_conflicts_are_grouped_once(self):
         second = {**bts_row(), "Flight_Number_Reporting_Airline": "2"}

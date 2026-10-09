@@ -1,5 +1,44 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.4 autumn-transition source cohort
+
+- **193 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
+  Release validation also exercises the suite with freshly installed wheels
+  outside the repository and replays the dated source with the pinned runtime.
+- The complete November source scan reads 570,550 rows and retains 3,246
+  JFK/LAX/ORD observations. The batch accepts 3,245 rows, quarantines one
+  ambiguous scheduled departure and finds no exact repeats. Each held-out field
+  matches 3,152 comparable observations, with 87 cancellation, six diversion
+  and one `dst_ambiguous` exclusions that reconcile to the selected population.
+- The observed NK1332 LAX departure at 01:20 on 2 November remains unresolved
+  because the benchmark supplies no fold. Its signed arrival-delay label still
+  belongs to source-input accounting. Raw source and accepted KPI populations
+  differ by that one row; accepted-source parity agrees on all six metrics.
+- Endpoint diagnostics record 16 scheduled windows / 23 changed-zone observations
+  and 14 actual windows / 20 observations, with no missing endpoints in either
+  accepted population. A separate calculation using IANA's 2 November transition
+  instants reproduces these counts without calling the coverage helper.
+- Two synthetic integration regressions distinguish both occurrences of an
+  actual 01:30 clock using a unique scheduled anchor plus signed departure delay.
+  They also retain quarantine and empty coverage for an ambiguous scheduled
+  anchor. A real-source diagnostic regression reproduces null gate/runway
+  timestamps from the bounded NK1332 excerpt. The report regression checks
+  backward changes, the explicit ambiguous exclusion and separate populations.
+- FAA 30 October / 27 November snapshots review the same airport identities and
+  locations. Runtime remains pinned to tzdata 2025.1 / IANA 2025a with an empty
+  system search path. January and March evidence remains byte-for-byte unchanged.
+- Ruff and Bandit passed with no findings. Development-tool versions match the
+  same-day v0.2.3 advisory evidence (47 audited tools, no known advisories at that
+  audit); no new dependency audit or whole-package security certification is
+  claimed. Local project metadata was skipped by the advisory service.
+
+The [November method and results](bts-2025-11-route-cohort.md) and
+[machine-readable evidence](evidence/bts-2025-11-route-cohort.json) document the
+route cohort. Real backward-offset windows and the quarantined anchor do not
+establish coverage of both actual-departure fold occurrences. The core API and
+row ruleset 0.1.1 remain unchanged. Verification is local; hosted CI and PyPI
+publication remain unavailable with current access.
+
 ## v0.2.3 spring-transition source cohort
 
 - **189 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS. The same

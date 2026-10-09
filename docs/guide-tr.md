@@ -158,11 +158,11 @@ arasında tutarlılık sağlayın.
 
 ## Doğrulama ve kapsam
 
-Bu sürüm, sentetik uç durum testlerine ek olarak BTS'nin Ocak ve Mart 2025
+Bu sürüm, sentetik uç durum testlerine ek olarak BTS'nin Ocak, Mart ve Kasım 2025
 dosyalarındaki JFK, LAX ve ORD arasındaki kayıtlarla sınanmış bir toplu işleme
 alpha sürümüdür. Ocak kohortunda 2.929 kaynak kaydından 2.928'i kabul edilmiş,
-saat ve süre alanları çelişen bir kayıt
-karantinaya alınmıştır. Varış gecikmesi ve havada kalma süresi karşılaştırmasına
+saat ve süre alanları çelişen bir kayıt karantinaya alınmıştır. Varış gecikmesi ve
+havada kalma süresi karşılaştırmasına
 giren 2.909 kayıtta kaynakla eşleşme görülmüştür; 11 iptal, 8 diversion ve bir
 saat çelişkisi açık dışlama nedenleriyle raporlanmıştır.
 
@@ -181,6 +181,24 @@ pencerede ofset farkı bulunmuştur. Her havaalanı diliminin kendi ofseti aynı
 penceresinin iki ucunda karşılaştırılır; çıkış ve varış dilimleri birbirleriyle
 karşılaştırılmaz. Bu sonuç mutlak UTC doğruluğuna ilişkin bağımsız bir kanıt
 değildir.
+
+[Kasım kohortunda](bts-2025-11-route-cohort.md) 3.246 kayıttan 3.245'i kabul
+edilmiş; iki hedef alan, karşılaştırmaya giren 3.152 normal uçuşta eşleşmiştir.
+87 iptal, 6 diversion ve bir belirsiz planlanan saat karşılaştırma dışında açıkça
+sayılmıştır. 2 Kasım'da LAX'taki planlanan 01:20 saati iki kez oluştuğu ve
+`departure_fold` seçilmediği için bu kayıt karantinaya alınmıştır. Bulgu, geçerli
+yerel saatin hangi oluşumunu kastettiğinin çözülmediğini gösterir; kaynağın
+hatalı saat bildirdiğini kanıtlamaz. Kabul edilen normal uçuşlarda varış kapsamı
+%100, OTP %75,9201'dir.
+
+Kasım'da tüm durumları içeren 3.245 kabul kaydının planlanan pencereleri arasında
+16, 3.152 normal kabul kaydının gerçekleşen pencereleri arasında 14 pencerede
+ofset farkı bulunmuştur. Çözülmüş bir zaman penceresinde ofsetin geri gitmesi ile
+henüz bir UTC anına bağlanamamış tekrarlı yerel saat farklı bulgulardır.
+Altı zaman alanının ek incelemesinde tekrarlı saatin ilk oluşumuna düşen bir
+kabul edilmiş kalkış anı (ATOT, fold 0) bulunmuştur; ikinci oluşuma düşen kabul
+edilmiş zaman yoktur. İki fold seçimini sınayan sentetik testler bu gerçek veri
+kapsamından ayrı değerlendirilir.
 
 Bu çalışmalar ayın bütün havaalanlarını, mutlak UTC
 tarihlerinin bağımsız doğruluğunu veya bir havayolunun üretim verisini
@@ -201,19 +219,21 @@ Depodaki JSON kanıtını çevrimdışı bir HTML raporuna dönüştürün:
 
 ```bash
 python examples/bts_validation_html.py \
-  --input docs/evidence/bts-2025-03-route-cohort.json \
-  --output bts-report-2025-03.html
+  --input docs/evidence/bts-2025-11-route-cohort.json \
+  --output bts-report-2025-11.html
 ```
 
-`bts-report-2025-03.html` dosyasını tarayıcıda açın. Rapor statiktir; JavaScript veya uzak
-sunucudan yazı tipi kullanmaz. Kaynak arşivinin ve saat dilimi eşlemesinin hash
+`bts-report-2025-11.html` dosyasını tarayıcıda açın. Rapor statiktir; JavaScript veya
+uzak sunucudan yazı tipi kullanmaz. Kaynak arşivinin ve saat dilimi eşlemesinin hash
 değerlerini, kaynak dönemini, çalışma ortamını, kayıt durumlarını ve saat
-bulgularını ve kayıtlı ofset pencerelerini gösterir. Karşılaştırmaya giren kayıtlarla dışlama nedenlerinin
+bulgularıyla kayıtlı ofset pencerelerini gösterir. Karşılaştırmaya giren kayıtlarla
+dışlama nedenlerinin
 paydaları ve kaynak grubunun OTP'siyle kabul grubunun OTP'si ayrı tutulur.
 HTML oluşturmak yeni bir veri doğrulaması çalıştırmaz; kaydedilmiş kanıtı sunar.
 
 Yeni bir çıktı dosyası seçin; var olan dosyalar üzerine yazılmaz. Resmî arşivi
 yeniden inceleyen `examples/validate_bts_month.py` komutu da `validation.json` ve
 `cohort.csv` yanında `validation.html` üretir. Gerçek aylık kaynak ve tam kohort
-pakete eklenmez; Ocak JSON kanıtında sınırlı bir kaynak bulgusu örneği bulunur.
-Mart kanıtı sınırlı sayıda türetilmiş ofset penceresi örneği içerir.
+pakete eklenmez; Ocak ve Kasım JSON kanıtlarında sınırlı kaynak bulgusu örnekleri
+bulunur. Mart ve Kasım kanıtları sınırlı sayıda türetilmiş ofset penceresi örneği
+içerir.

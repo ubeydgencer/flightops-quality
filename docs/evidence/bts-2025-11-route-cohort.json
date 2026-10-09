@@ -1,0 +1,946 @@
+{
+  "schema_version": "1",
+  "source": {
+    "archive_name": "bts-2025-11.zip",
+    "archive_sha256": "6d5b68eea3ebb25f3cb2843e701a6c809b5455301b3bbd7802a20d522ed770c8",
+    "archive_bytes": 28847755,
+    "csv_member": "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2025_11.csv",
+    "csv_sha256": "6d6d63f3bb312a6695d4a8b17958bc47e4e71fdf7396ec882c9c9a61faa6efc2",
+    "csv_bytes": 258071953,
+    "source_rows_scanned": 570550,
+    "columns": 110,
+    "source_date_range": {
+      "start": "2025-11-01",
+      "end": "2025-11-30"
+    },
+    "period": "2025-11",
+    "source_url_label": "https://transtats.bts.gov/PREZIP/On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2025_11.zip"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "system": "Darwin",
+    "package_version": "0.2.4",
+    "ruleset_version": "0.1.1",
+    "tzdata_package_version": "2025.1",
+    "tzdata_iana_version": "2025a",
+    "timezone_system_search_paths": [],
+    "timezone_note": "ZoneInfo uses system search paths first. Set PYTHONTZPATH='' and pin tzdata for replay."
+  },
+  "cohort": {
+    "airport_codes": [
+      "JFK",
+      "LAX",
+      "ORD"
+    ],
+    "airport_timezones": {
+      "JFK": "America/New_York",
+      "LAX": "America/Los_Angeles",
+      "ORD": "America/Chicago"
+    },
+    "timezone_mapping_sha256": "22d092c690ba02f79b19424966faae4e238ba73ab17dac3da237f004ec9931f1",
+    "predicate": "Origin and Dest both belong to the timezone mapping keys; all statuses retained.",
+    "truncated": false,
+    "full_cohort_bundled": false,
+    "diagnostic_source_excerpts": true
+  },
+  "limits": {
+    "archive_bytes": 67108864,
+    "csv_bytes": 536870912,
+    "source_rows": 1000000,
+    "cohort_rows": 20000,
+    "cohort_cells": 2000000,
+    "cohort_value_bytes": 67108864,
+    "columns": 256
+  },
+  "validation": {
+    "input_rows": 3246,
+    "batch_summary": {
+      "counts": {
+        "input": 3246,
+        "accepted": 3245,
+        "quarantined": 1,
+        "duplicates": 0
+      },
+      "issue_counts": {
+        "ACTUAL_INCOMPLETE": 1,
+        "BTS_TIME_UNRESOLVED": 3,
+        "SCHEDULE_INCOMPLETE": 1,
+        "TIME_AMBIGUOUS": 1
+      },
+      "accepted_population": {
+        "flights": 3245,
+        "cancelled": 87,
+        "diverted": 6,
+        "cancellation_rate_percent": 2.6810477657935285,
+        "diversion_rate_percent": 0.18489984591679506
+      },
+      "arrival_otp_15_completed": {
+        "eligible": 3152,
+        "coverage_population": 3152,
+        "coverage_percent": 100.0,
+        "on_time": 2393,
+        "late": 759,
+        "percent": 75.92005076142132,
+        "excluded_cancelled_or_diverted": 93,
+        "excluded_missing_arrival_delay": 0,
+        "policy": "Accepted unique, non-cancelled, non-diverted flights with valid arrival delay; delay < 15 minutes."
+      }
+    },
+    "group_dispositions": {
+      "input": 3246,
+      "accepted": 3245,
+      "quarantined": 1,
+      "duplicates": 0
+    },
+    "source_input_kpis": {
+      "all_source_rows": {
+        "input_rows": 3246,
+        "coverage_population": 3153,
+        "eligible": 3153,
+        "on_time": 2394,
+        "late": 759,
+        "percent": 75.92768791627022,
+        "coverage_percent": 100.0,
+        "excluded_counts": {
+          "cancelled_or_diverted": 93
+        }
+      },
+      "accepted_unique_rows": {
+        "input_rows": 3245,
+        "coverage_population": 3152,
+        "eligible": 3152,
+        "on_time": 2393,
+        "late": 759,
+        "percent": 75.92005076142132,
+        "coverage_percent": 100.0,
+        "excluded_counts": {
+          "cancelled_or_diverted": 93
+        }
+      },
+      "accepted_parity": {
+        "eligible": {
+          "source": 3152,
+          "derived": 3152,
+          "matched": true
+        },
+        "coverage_population": {
+          "source": 3152,
+          "derived": 3152,
+          "matched": true
+        },
+        "on_time": {
+          "source": 2393,
+          "derived": 2393,
+          "matched": true
+        },
+        "late": {
+          "source": 759,
+          "derived": 759,
+          "matched": true
+        },
+        "percent": {
+          "source": 75.92005076142132,
+          "derived": 75.92005076142132,
+          "matched": true
+        },
+        "coverage_percent": {
+          "source": 100.0,
+          "derived": 100.0,
+          "matched": true
+        }
+      },
+      "policy": "Original signed ArrDelay, strict delay < 15. All-source results count raw rows; accepted results use original batch dispositions. This is source-input accounting, not a held-out check."
+    },
+    "holdout_checks": {
+      "ArrDelay": {
+        "metric": "arrival_delay_minutes",
+        "checked": 3152,
+        "matched": 3152,
+        "mismatched": 0,
+        "excluded_counts": {
+          "cancelled": 87,
+          "diverted": 6,
+          "dst_ambiguous": 1
+        },
+        "mismatch_examples": [],
+        "input_rows": 3246,
+        "reconciled": true
+      },
+      "AirTime": {
+        "metric": "airborne_minutes",
+        "checked": 3152,
+        "matched": 3152,
+        "mismatched": 0,
+        "excluded_counts": {
+          "cancelled": 87,
+          "diverted": 6,
+          "dst_ambiguous": 1
+        },
+        "mismatch_examples": [],
+        "input_rows": 3246,
+        "reconciled": true
+      }
+    },
+    "timezone_offset_transitions": {
+      "policy": {
+        "population": "Original batch accepted unique flights only; quarantined rows and exact repeats are excluded.",
+        "scheduled": "Resolved sobt-to-sibt windows for every accepted unique flight, including cancellation and diversion.",
+        "actual": "Resolved aobt-to-aibt windows for noncancelled, nondiverted accepted unique flights only.",
+        "comparison": "Each unique origin/destination IANA zone is compared with itself at both UTC endpoints; airport zones are never compared to each other.",
+        "absolute_utc_validation": false,
+        "interpretation": "A derived endpoint UTC-offset difference is coverage evidence, not independent absolute UTC validation and not necessarily a DST change.",
+        "limitations": "Only the two endpoints are compared. Two compensating offset changes inside a window cannot be detected.",
+        "resolution": "Use already resolved aware instants; do not guess a local date, midnight policy or DST fold.",
+        "units": "offset_change_rows counts flight windows; zone_change_observations counts changed unique zones within those windows. Examples show at most ten windows per population."
+      },
+      "scheduled": {
+        "population_rows": 3245,
+        "checked": 3245,
+        "excluded_counts": {
+          "missing_timestamps": 0
+        },
+        "offset_change_rows": 16,
+        "zone_change_observations": 23,
+        "examples": [
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-02\",\"19977\",\"1342\",\"12892\",\"13930\",25]",
+            "source_row_number": 80851,
+            "service_date": "2025-11-02",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T07:25:00+00:00",
+            "window_end_utc": "2025-11-02T11:29:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:25:00-07:00",
+                "local_end": "2025-11-02T03:29:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19977\",\"440\",\"12892\",\"13930\",1400]",
+            "source_row_number": 83541,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T06:20:00+00:00",
+            "window_end_utc": "2025-11-02T10:16:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Chicago",
+                "offset_start_seconds": -18000,
+                "offset_end_seconds": -21600,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T01:20:00-05:00",
+                "local_end": "2025-11-02T04:16:00-06:00"
+              },
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T23:20:00-07:00",
+                "local_end": "2025-11-02T02:16:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19790\",\"915\",\"12892\",\"12478\",1435]",
+            "source_row_number": 162541,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T06:55:00+00:00",
+            "window_end_utc": "2025-11-02T12:30:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T23:55:00-07:00",
+                "local_end": "2025-11-02T04:30:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19790\",\"960\",\"12892\",\"12478\",1295]",
+            "source_row_number": 164071,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T04:35:00+00:00",
+            "window_end_utc": "2025-11-02T10:00:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T21:35:00-07:00",
+                "local_end": "2025-11-02T02:00:00-08:00"
+              },
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:35:00-04:00",
+                "local_end": "2025-11-02T05:00:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"20436\",\"2504\",\"12892\",\"12478\",1311]",
+            "source_row_number": 183805,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T04:51:00+00:00",
+            "window_end_utc": "2025-11-02T10:29:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T21:51:00-07:00",
+                "local_end": "2025-11-02T02:29:00-08:00"
+              },
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:51:00-04:00",
+                "local_end": "2025-11-02T05:29:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"10\",\"12892\",\"12478\",1324]",
+            "source_row_number": 276557,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T05:04:00+00:00",
+            "window_end_utc": "2025-11-02T10:30:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T22:04:00-07:00",
+                "local_end": "2025-11-02T02:30:00-08:00"
+              },
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T01:04:00-04:00",
+                "local_end": "2025-11-02T05:30:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"117\",\"12478\",\"12892\",1200]",
+            "source_row_number": 276985,
+            "service_date": "2025-11-01",
+            "origin": "JFK",
+            "destination": "LAX",
+            "route": "JFK-LAX",
+            "window_start_utc": "2025-11-02T00:00:00+00:00",
+            "window_end_utc": "2025-11-02T06:04:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T20:00:00-04:00",
+                "local_end": "2025-11-02T01:04:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"300\",\"12478\",\"12892\",1260]",
+            "source_row_number": 277638,
+            "service_date": "2025-11-01",
+            "origin": "JFK",
+            "destination": "LAX",
+            "route": "JFK-LAX",
+            "window_start_utc": "2025-11-02T01:00:00+00:00",
+            "window_end_utc": "2025-11-02T07:21:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T21:00:00-04:00",
+                "local_end": "2025-11-02T02:21:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-02\",\"19805\",\"999\",\"12892\",\"13930\",45]",
+            "source_row_number": 300642,
+            "service_date": "2025-11-02",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T07:45:00+00:00",
+            "window_end_utc": "2025-11-02T11:43:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:45:00-07:00",
+                "local_end": "2025-11-02T03:43:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"1009\",\"12892\",\"13930\",1439]",
+            "source_row_number": 300924,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T06:59:00+00:00",
+            "window_end_utc": "2025-11-02T11:10:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Chicago",
+                "offset_start_seconds": -18000,
+                "offset_end_seconds": -21600,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T01:59:00-05:00",
+                "local_end": "2025-11-02T05:10:00-06:00"
+              },
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T23:59:00-07:00",
+                "local_end": "2025-11-02T03:10:00-08:00"
+              }
+            ]
+          }
+        ],
+        "reconciled": true
+      },
+      "actual": {
+        "population_rows": 3152,
+        "checked": 3152,
+        "excluded_counts": {
+          "missing_timestamps": 0
+        },
+        "offset_change_rows": 14,
+        "zone_change_observations": 20,
+        "examples": [
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-02\",\"19977\",\"1342\",\"12892\",\"13930\",25]",
+            "source_row_number": 80851,
+            "service_date": "2025-11-02",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T07:28:00+00:00",
+            "window_end_utc": "2025-11-02T11:27:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:28:00-07:00",
+                "local_end": "2025-11-02T03:27:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19977\",\"440\",\"12892\",\"13930\",1400]",
+            "source_row_number": 83541,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T06:15:00+00:00",
+            "window_end_utc": "2025-11-02T10:08:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Chicago",
+                "offset_start_seconds": -18000,
+                "offset_end_seconds": -21600,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T01:15:00-05:00",
+                "local_end": "2025-11-02T04:08:00-06:00"
+              },
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T23:15:00-07:00",
+                "local_end": "2025-11-02T02:08:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19790\",\"915\",\"12892\",\"12478\",1435]",
+            "source_row_number": 162541,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T06:49:00+00:00",
+            "window_end_utc": "2025-11-02T12:21:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T23:49:00-07:00",
+                "local_end": "2025-11-02T04:21:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19790\",\"960\",\"12892\",\"12478\",1295]",
+            "source_row_number": 164071,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T04:24:00+00:00",
+            "window_end_utc": "2025-11-02T09:48:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T21:24:00-07:00",
+                "local_end": "2025-11-02T01:48:00-08:00"
+              },
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:24:00-04:00",
+                "local_end": "2025-11-02T04:48:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"20436\",\"2504\",\"12892\",\"12478\",1311]",
+            "source_row_number": 183805,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T04:41:00+00:00",
+            "window_end_utc": "2025-11-02T10:32:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T21:41:00-07:00",
+                "local_end": "2025-11-02T02:32:00-08:00"
+              },
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:41:00-04:00",
+                "local_end": "2025-11-02T05:32:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"10\",\"12892\",\"12478\",1324]",
+            "source_row_number": 276557,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "JFK",
+            "route": "LAX-JFK",
+            "window_start_utc": "2025-11-02T04:55:00+00:00",
+            "window_end_utc": "2025-11-02T10:23:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T21:55:00-07:00",
+                "local_end": "2025-11-02T02:23:00-08:00"
+              },
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:55:00-04:00",
+                "local_end": "2025-11-02T05:23:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"117\",\"12478\",\"12892\",1200]",
+            "source_row_number": 276985,
+            "service_date": "2025-11-01",
+            "origin": "JFK",
+            "destination": "LAX",
+            "route": "JFK-LAX",
+            "window_start_utc": "2025-11-01T23:55:00+00:00",
+            "window_end_utc": "2025-11-02T06:04:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T19:55:00-04:00",
+                "local_end": "2025-11-02T01:04:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"300\",\"12478\",\"12892\",1260]",
+            "source_row_number": 277638,
+            "service_date": "2025-11-01",
+            "origin": "JFK",
+            "destination": "LAX",
+            "route": "JFK-LAX",
+            "window_start_utc": "2025-11-02T02:03:00+00:00",
+            "window_end_utc": "2025-11-02T07:49:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/New_York",
+                "offset_start_seconds": -14400,
+                "offset_end_seconds": -18000,
+                "change_seconds": -3600,
+                "local_start": "2025-11-01T22:03:00-04:00",
+                "local_end": "2025-11-02T02:49:00-05:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-02\",\"19805\",\"999\",\"12892\",\"13930\",45]",
+            "source_row_number": 300642,
+            "service_date": "2025-11-02",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T07:58:00+00:00",
+            "window_end_utc": "2025-11-02T12:06:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:58:00-07:00",
+                "local_end": "2025-11-02T04:06:00-08:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-11-01\",\"19805\",\"1009\",\"12892\",\"13930\",1439]",
+            "source_row_number": 300924,
+            "service_date": "2025-11-01",
+            "origin": "LAX",
+            "destination": "ORD",
+            "route": "LAX-ORD",
+            "window_start_utc": "2025-11-02T07:07:00+00:00",
+            "window_end_utc": "2025-11-02T11:13:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -25200,
+                "offset_end_seconds": -28800,
+                "change_seconds": -3600,
+                "local_start": "2025-11-02T00:07:00-07:00",
+                "local_end": "2025-11-02T03:13:00-08:00"
+              }
+            ]
+          }
+        ],
+        "reconciled": true
+      }
+    },
+    "source_status_counts": {
+      "Cancelled": {
+        "0": 3159,
+        "1": 87,
+        "invalid": 0
+      },
+      "Diverted": {
+        "0": 3240,
+        "1": 6,
+        "invalid": 0
+      },
+      "cohorts": {
+        "normal": 3153,
+        "cancelled_only": 87,
+        "diverted_only": 6,
+        "cancelled_and_diverted": 0,
+        "invalid_status": 0
+      }
+    },
+    "normalizer_issue_counts": {
+      "ACTUAL_INCOMPLETE": 1,
+      "BTS_TIME_UNRESOLVED": 1,
+      "SCHEDULE_INCOMPLETE": 1,
+      "TIME_AMBIGUOUS": 1
+    },
+    "normalizer_issue_examples": [
+      {
+        "source_row_number": 234864,
+        "raw_sha256": "1d99d0efe711b4172c46ace45dd9d68538c79d6cc214aea15ed8d52d0491b34c",
+        "source": "bts",
+        "record_id": "[\"2025-11-02\",\"20416\",\"1332\",\"12892\",\"13930\",80]",
+        "issues": [
+          {
+            "code": "TIME_AMBIGUOUS",
+            "severity": "error",
+            "fields": [
+              "FlightDate",
+              "CRSDepTime",
+              "Origin"
+            ],
+            "message": "Local clock occurs twice; supply an offset or explicit fold 0/1."
+          },
+          {
+            "code": "BTS_TIME_UNRESOLVED",
+            "severity": "warning",
+            "fields": [
+              "CRSArrTime",
+              "CRSElapsedTime"
+            ],
+            "message": "Scheduled arrival date is unresolved; a local clock alone is insufficient."
+          },
+          {
+            "code": "BTS_TIME_UNRESOLVED",
+            "severity": "warning",
+            "fields": [
+              "DepTime",
+              "DepDelay"
+            ],
+            "message": "Actual departure date needs a resolved schedule anchor and signed departure delay."
+          },
+          {
+            "code": "BTS_TIME_UNRESOLVED",
+            "severity": "warning",
+            "fields": [
+              "ArrTime",
+              "ActualElapsedTime"
+            ],
+            "message": "Actual arrival date needs actual departure and elapsed time evidence."
+          },
+          {
+            "code": "SCHEDULE_INCOMPLETE",
+            "severity": "warning",
+            "fields": [
+              "sobt",
+              "sibt"
+            ],
+            "message": "Scheduled gate timestamps are incomplete."
+          },
+          {
+            "code": "ACTUAL_INCOMPLETE",
+            "severity": "warning",
+            "fields": [
+              "aobt",
+              "aibt"
+            ],
+            "message": "Normal-flight actual gate timestamps are incomplete; affected metrics remain null."
+          }
+        ],
+        "raw_fields": {
+          "FlightDate": "2025-11-02",
+          "Reporting_Airline": "NK",
+          "DOT_ID_Reporting_Airline": "20416",
+          "Flight_Number_Reporting_Airline": "1332",
+          "Origin": "LAX",
+          "OriginAirportID": "12892",
+          "OriginAirportSeqID": "1289209",
+          "Dest": "ORD",
+          "DestAirportID": "13930",
+          "DestAirportSeqID": "1393008",
+          "Tail_Number": "N644NK",
+          "Cancelled": "0.00",
+          "Diverted": "0.00",
+          "CRSDepTime": "0120",
+          "CRSArrTime": "0628",
+          "DepTime": "0110",
+          "ArrTime": "0616",
+          "WheelsOff": "0122",
+          "WheelsOn": "0610",
+          "CRSElapsedTime": "248.00",
+          "DepDelay": "-10.00",
+          "ActualElapsedTime": "246.00",
+          "TaxiOut": "12.00",
+          "TaxiIn": "6.00",
+          "AirTime": "228.00",
+          "ArrDelay": "-12.00"
+        },
+        "flight": {
+          "source": "bts",
+          "record_id": "[\"2025-11-02\",\"20416\",\"1332\",\"12892\",\"13930\",80]",
+          "carrier": "NK",
+          "flight_number": "1332",
+          "origin": "LAX",
+          "destination": "ORD",
+          "aircraft_registration": "N644NK",
+          "cancelled": false,
+          "diverted": false,
+          "service_date": "2025-11-02",
+          "sobt": null,
+          "sibt": null,
+          "aobt": null,
+          "aibt": null,
+          "atot": null,
+          "aldt": null,
+          "provenance": {}
+        }
+      }
+    ],
+    "unresolved_counts": {
+      "ACTUAL_INCOMPLETE": 1,
+      "BTS_TIME_UNRESOLVED": 1,
+      "SCHEDULE_INCOMPLETE": 1,
+      "TIME_AMBIGUOUS": 1
+    },
+    "source_missing_fields": {
+      "ActualElapsedTime": 93,
+      "AirTime": 93,
+      "ArrDelay": 93,
+      "ArrTime": 87,
+      "DepDelay": 84,
+      "DepTime": 84,
+      "TaxiIn": 87,
+      "TaxiOut": 87,
+      "WheelsOff": 87,
+      "WheelsOn": 87
+    },
+    "route_counts": {
+      "JFK-LAX": 862,
+      "JFK-ORD": 176,
+      "LAX-JFK": 860,
+      "LAX-ORD": 584,
+      "ORD-JFK": 176,
+      "ORD-LAX": 588
+    },
+    "date_range": {
+      "start": "2025-11-01",
+      "end": "2025-11-30",
+      "valid_rows": 3246,
+      "invalid_rows": 0
+    },
+    "airport_ids": {
+      "JFK": {
+        "airport_ids": [
+          "12478"
+        ],
+        "airport_sequence_ids": [
+          "1247805"
+        ],
+        "observations": {
+          "Dest": 1036,
+          "Origin": 1038
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      },
+      "LAX": {
+        "airport_ids": [
+          "12892"
+        ],
+        "airport_sequence_ids": [
+          "1289209"
+        ],
+        "observations": {
+          "Dest": 1450,
+          "Origin": 1444
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      },
+      "ORD": {
+        "airport_ids": [
+          "13930"
+        ],
+        "airport_sequence_ids": [
+          "1393008"
+        ],
+        "observations": {
+          "Dest": 760,
+          "Origin": 764
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      }
+    },
+    "policy": {
+      "scope": "Every caller-supplied source row; no sampling or status selection in this helper.",
+      "holdouts": "ArrDelay and AirTime are withheld only in a separate probe; original rows determine batch dispositions.",
+      "tolerance_minutes": 0,
+      "midnight_policy": null,
+      "departure_fold": null,
+      "absolute_utc_validation": false,
+      "duplicate_policy": "Hold-outs account for every source row; batch KPIs use original accepted unique flights.",
+      "missing_policy": "Never derive dates or durations from clock order; source-clock absence is reported separately.",
+      "reconstruction_checks": "Input-derived DepDelay, ActualElapsedTime and taxi KPI equalities are not claimed as independent hold-outs.",
+      "issue_count_unit": "Source rows containing a code, before batch duplicate/conflict findings.",
+      "exclusion_priority": "invalid/cancelled/diverted status, missing/invalid target, probe error, missing prediction."
+    }
+  },
+  "cohort_artifact": {
+    "name": "cohort.csv",
+    "sha256": "a3881c524074a5f007ba09b525364cf997e8e9ecb5bab40701d466d7aa3e8d87",
+    "source_line_field": "_source_line_number",
+    "note": "Added source line metadata is excluded from normalization and duplicate fingerprints."
+  }
+}
