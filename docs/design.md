@@ -6,7 +6,8 @@
 raw CSV + caller timezone map
     -> source adapter -> UTC FlightLeg + findings + provenance
     -> identity groups -> accepted / quarantined / exact repeats
-    -> audit JSON + HTML + JSONL -> example SQLite warehouse -> explicit-cohort SQL
+    -> batch coverage + caller-selected quality gates
+    -> audit JSON + HTML + JSONL -> gated SQLite warehouse -> explicit-cohort SQL
 ```
 
 No provider fetches, credentials or network access are built into the core.
@@ -39,12 +40,40 @@ environment snapshot by itself.
 - Exact raw repeats are audited; different payloads with one identity have no
   silent winner. Consumers must explicitly resolve such conflicts upstream.
 - Cancelled/diverted cohorts are retained and excluded from normal arrival OTP.
+- Arrival-data coverage is a separate measurement from OTP. Coverage counts
+  observed delays over accepted unique non-cancelled, non-diverted flights;
+  OTP counts on-time flights over that cohort's observed delays. The first is a
+  data-availability signal and the second is an operational observation.
+- Batch quality thresholds are opt-in consumer requirements, recorded alongside
+  their populations, observed values and reasons. They do not assert an airline
+  standard. An empty percentage population cannot pass a configured threshold.
+- Exact repeats cannot inflate the quarantine-rate denominator. Every member of
+  a conflicting identity group stays in that denominator as quarantined.
 - Turnaround requires an explicitly supplied valid flight pair; tail swaps,
   diversion and airport mismatch need upstream reconciliation.
 
+## Output publication
+
+The CLI writes every artifact to a private staging directory before publishing
+it with an exclusive rename. It uses the operating system's no-replacement
+primitive: [Apple's `RENAME_EXCL` definition](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/stdio.h)
+or [Linux `renameat2` with `RENAME_NOREPLACE`](https://man7.org/linux/man-pages/man2/rename.2.html).
+Unavailable primitives produce an error; the tool does not fall back to a rename
+that could replace an existing empty directory. This prevents a write failure
+from presenting an incomplete audit as the final output. It does not promise
+power-loss durability or turn a shared writable parent directory into an access
+control boundary.
+
+The warehouse example similarly builds a private temporary SQLite file, runs
+the route query and closes the connection before publishing. A hard link creates
+the final name without replacing an existing path, then the temporary name is
+removed. The filesystem must support hard links. Internal `audit_record_id`
+values link normalized flights to raw records; source `row_number` values are
+preserved as positions and need not be unique for API-produced audits.
+
 ## Limits and next steps
 
-v0.1 is a batch alpha, tested on synthetic edge cases. It has not been validated
+v0.2 is a batch alpha, tested on synthetic edge cases. It has not been validated
 against a full historical BTS release or an airline's production feed. Arrival
 clock-only records, diversion itineraries, multiple gate departures and revisions
 remain unresolved rather than guessed. Codes in supplied airport maps can change

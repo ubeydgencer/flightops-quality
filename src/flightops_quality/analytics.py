@@ -41,6 +41,11 @@ def summarize(report: BatchReport) -> dict[str, Any]:
         },
         "arrival_otp_15_completed": {
             "eligible": eligible,
+            "coverage_population": eligible + missing_arrival,
+            "coverage_percent": (
+                100 * eligible / (eligible + missing_arrival)
+                if eligible + missing_arrival else None
+            ),
             "on_time": on_time,
             "late": eligible - on_time,
             "percent": 100 * on_time / eligible if eligible else None,

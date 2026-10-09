@@ -87,6 +87,8 @@ class BatchReport:
     def __post_init__(self) -> None:
         if self.input_count != len(self.accepted) + len(self.quarantined) + len(self.duplicates):
             raise ValueError("Every input row must appear in exactly one output category")
+        if any(not record.accepted for record in self.accepted):
+            raise ValueError("Accepted records must contain a normalized flight without error findings")
 
     @property
     def counts(self) -> dict:

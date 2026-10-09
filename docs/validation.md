@@ -1,5 +1,38 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.0 batch quality gates and warehouse integrity
+
+- **96 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
+- Sparse-arrival fixtures distinguish 100% OTP from 1% observation coverage.
+  Tests cover empty/all-missing/cancelled/diverted cohorts, inclusive thresholds,
+  nonfinite/boolean/invalid policy values and exact-repeat denominator inflation.
+- Independent SQLite route SQL agrees with the Python OTP and coverage
+  populations. Stored KPI values are reconstructed from normalized timestamps;
+  contradictory gate measurements or decisions are rejected, even with an
+  explicit failed-gate override.
+- Injected HTML, JSONL, SQLite insertion, route-query and publication failures
+  leave no partial final artifact and allow retry. Existing empty directories,
+  files and dangling symlinks survive publication collisions. Native exclusive
+  directory publication was exercised on macOS; Linux and Windows runtime
+  behavior has not been validated on this host.
+- The warehouse retains raw source positions, independent record IDs, foreign
+  key lineage, normalized flight fields, provenance, audit versions and the
+  quality-gate result/override. Two API records sharing source row number 1 load
+  with separate lineage IDs.
+- Three agents reviewed the feature and documentation. A reproduced mismatch
+  between a gate's own values and the actual records was fixed and rechecked.
+- Ruff passed. Bandit reported **no findings** in `src` and `examples`; the
+  development-tool advisory audit reported no known vulnerabilities. The local
+  editable project was skipped by that advisory service, and the core still has
+  no mandatory runtime dependencies.
+- README and quality-gate Python examples ran successfully; CLI/ETL examples,
+  local documentation links and the professional Turkish usage guide were
+  checked against the current synthetic fixtures.
+
+The package version is 0.2.0; the row ruleset remains 0.1.1. Batch policy is
+recorded separately in each audit. These results are local evidence, not hosted
+CI results or validation of a real historical flight dataset.
+
 ## v0.1.1 security and correctness patch
 
 - **52 unittest cases passed** on CPython 3.9.6 and 3.12.14.

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0 — 2026-10-09
+
+- Arrival-delay coverage is reported separately from arrival OTP, with explicit
+  observed and missing populations in Python and the independent route SQL.
+- Opt-in batch quality gates validate minimum coverage, minimum OTP-eligible
+  flight counts and maximum quarantine rates. Reports retain thresholds,
+  measurements and reasons; a failed CLI gate writes the audit and exits 1.
+- Accepted batch records must have a normalized flight with no error findings.
+- Audit outputs and SQLite warehouses are published only after all writes and
+  queries succeed. Existing outputs are preserved, including collision cases.
+- SQLite enforces the quality-gate result by default and records an explicit
+  failed-gate override. Internal record IDs preserve lineage when source row
+  numbers repeat; flight metadata and audit versions remain available in SQL.
+- The Turkish documentation is now a usage guide covering installation, data
+  formats, quality checks, report interpretation and ETL integration.
+
 ## 0.1.1 — 2026-10-09
 
 - Strict ISO offset bounds and canonical numeric BTS identities prevent silent

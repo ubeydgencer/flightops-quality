@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Use the latest 0.1.x release. The project is an alpha batch library; old alpha
+Use the latest release. The project is an alpha batch library; old alpha
 versions do not receive separate backports. Use a maintained Python interpreter
 and timezone database even though the compatibility floor is Python 3.9.
 
@@ -30,11 +30,17 @@ There is no guaranteed response deadline for this independently maintained proje
   of at most 4096 bits. Cycles and non-JSON objects fail with `ValueError`.
 - All report text, including crafted row numbers, is HTML-escaped. Reports have
   no JavaScript or remote assets. Raw payloads are preserved in local outputs;
-  those outputs can contain confidential data. The CLI creates its final output
-  directory with mode 0700 on POSIX; use appropriate ACLs and retention on other
-  platforms and when moving or sharing reports.
+  those outputs can contain confidential data. The CLI stages outputs in a
+  private directory with mode 0700 on POSIX, then publishes with an exclusive
+  rename. Missing native support fails without a partial final audit. Use
+  appropriate access controls and retention when moving or sharing reports.
 - The SQLite example binds all input values as SQL parameters. It creates a new
-  database and refuses to overwrite an existing path.
+  private staged database and publishes without replacing an existing path only
+  after inserts and the metric query succeed. A failed quality gate blocks
+  loading unless the caller explicitly requests and records an override.
+- Batch thresholds reject nonfinite percentages, boolean values and invalid
+  counts. Policy and result are audit metadata, not signed authenticity evidence;
+  the SQLite example expects an audit from a trusted local pipeline.
 
 The CLI is a local batch tool, not an authenticated web service. Service wrappers
 must enforce their own request/concurrency limits, access control and retention.

@@ -3,10 +3,16 @@ from __future__ import annotations
 
 import argparse
 import csv
+import ctypes
+import errno
 import hashlib
 import importlib.metadata
 import io
 import json
+import os
+import shutil
+import sys
+import tempfile
 from pathlib import Path
 from zoneinfo import TZPATH
 
@@ -14,6 +20,7 @@ from . import __version__
 from .adapters.bts import normalize_bts_row
 from .adapters.canonical import normalize_record
 from .batch import analyze_results
+from .gates import QualityPolicy
 from .reporting import audit_document, render_html
 
 DEFAULT_INPUT_MB = 50
@@ -40,6 +47,77 @@ def _unique_json_object(pairs):
     return result
 
 
+def _publish_directory(staging: Path, destination: Path) -> None:
+    """Atomically publish a sibling directory without replacing any path.
+
+    POSIX rename() may replace an existing empty directory. Use the OS's
+    exclusive variant instead; unsupported platforms/filesystems fail closed.
+    The fixed ABI flags come from Apple's sys/stdio.h and Linux rename(2).
+    """
+    if staging.parent != destination.parent:
+        raise ValueError("Audit staging and destination must share a parent")
+    if sys.platform == "win32":
+        # Python documents that Windows rename always rejects an existing dst.
+        os.rename(staging, destination)
+        return
+    if sys.platform not in {"darwin", "linux"}:
+        raise OSError(errno.ENOTSUP, "Atomic exclusive audit publication is unsupported on this platform")
+    parent_fd = os.open(staging.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        symbol = "renameatx_np" if sys.platform == "darwin" else "renameat2"
+        try:
+            rename = getattr(libc, symbol)
+        except AttributeError as exc:
+            raise OSError(errno.ENOTSUP, "This OS lacks atomic exclusive audit publication") from exc
+        rename.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int,
+                           ctypes.c_char_p, ctypes.c_uint]
+        rename.restype = ctypes.c_int
+        flag = 0x00000004 if sys.platform == "darwin" else 1
+        result = rename(parent_fd, os.fsencode(staging.name), parent_fd,
+                        os.fsencode(destination.name), flag)
+        if result != 0:
+            error = ctypes.get_errno()
+            raise OSError(error, os.strerror(error), str(destination))
+    finally:
+        os.close(parent_fd)
+
+
+def _private_text_file(path: Path):
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, 0o600)
+    try:
+        return os.fdopen(fd, "w", encoding="utf-8")
+    except BaseException:
+        os.close(fd)
+        raise
+
+
+def _write_audit(document: dict, destination: Path) -> None:
+    """Publish all five artifacts together; clean staging after write failure."""
+    if not destination.name or destination.name in {".", ".."}:
+        raise ValueError("Choose a new named output directory")
+    destination.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    parent = destination.parent.resolve(strict=True)
+    destination = parent / destination.name
+    if os.path.lexists(destination):
+        raise FileExistsError(errno.EEXIST, "Output path already exists", str(destination))
+    staging = Path(tempfile.mkdtemp(prefix=f".{destination.name}-", suffix=".staging", dir=parent))
+    try:
+        with _private_text_file(staging / "audit.json") as handle:
+            handle.write(json.dumps(document, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
+        with _private_text_file(staging / "audit.html") as handle:
+            handle.write(render_html(document))
+        for category in ("accepted", "quarantined", "duplicates"):
+            with _private_text_file(staging / f"{category}.jsonl") as handle:
+                for entry in document[category]:
+                    handle.write(json.dumps(entry, ensure_ascii=False, allow_nan=False) + "\n")
+        _publish_directory(staging, destination)
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging)
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Audit flight CSV records without silently discarding rows")
     parser.add_argument("input", type=Path, help="UTF-8 CSV input")
@@ -55,6 +133,12 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-cells", type=int, default=DEFAULT_MAX_CELLS,
                         help="Maximum records times columns (default: 2000000)")
     parser.add_argument("--fail-on-error", action="store_true", help="Exit 1 when any row is quarantined")
+    parser.add_argument("--min-arrival-coverage-percent", type=float,
+                        help="Minimum observed arrival delay coverage among accepted normal flights (0–100)")
+    parser.add_argument("--min-otp-eligible-flights", type=int,
+                        help="Minimum number of accepted flights eligible for arrival OTP")
+    parser.add_argument("--max-quarantine-rate-percent", type=float,
+                        help="Maximum quarantined share excluding exact repeats (0–100)")
     parser.add_argument("--version", action="version", version=__version__)
     return parser
 
@@ -65,7 +149,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.max_input_mb <= 0 or args.max_records <= 0 or args.max_cells <= 0:
             raise ValueError("Input size and record limits must be positive integers")
-        if args.output.exists():
+        quality_policy = QualityPolicy(
+            min_arrival_coverage_percent=args.min_arrival_coverage_percent,
+            min_otp_eligible_flights=args.min_otp_eligible_flights,
+            max_quarantine_rate_percent=args.max_quarantine_rate_percent,
+        )
+        if os.path.lexists(args.output):
             raise ValueError("Output directory already exists; choose a new path to preserve prior audits")
         if args.format == "bts" and not args.timezones:
             raise ValueError("BTS input requires --timezones with a caller-supplied IANA timezone mapping")
@@ -118,16 +207,10 @@ def main(argv: list[str] | None = None) -> int:
                                   "system_search_paths": [str(p) for p in TZPATH],
                                   "note": "ZoneInfo searches system paths before the tzdata fallback; pin the environment for reproducibility."},
         }
-        document = audit_document(report, manifest)
-        args.output.mkdir(parents=True, mode=0o700)
-        (args.output / "audit.json").write_text(json.dumps(document, indent=2, ensure_ascii=False,
-                                                         allow_nan=False) + "\n", encoding="utf-8")
-        (args.output / "audit.html").write_text(render_html(document), encoding="utf-8")
-        for category in ("accepted", "quarantined", "duplicates"):
-            with (args.output / f"{category}.jsonl").open("w", encoding="utf-8") as handle:
-                for entry in document[category]:
-                    handle.write(json.dumps(entry, ensure_ascii=False, allow_nan=False) + "\n")
-        print(json.dumps(document["summary"], indent=2))
-        return int(args.fail_on_error and bool(report.quarantined))
+        document = audit_document(report, manifest, quality_policy=quality_policy)
+        _write_audit(document, args.output)
+        print(json.dumps({**document["summary"], "quality_gate": document["quality_gate"]}, indent=2))
+        return int(document["quality_gate"]["status"] == "failed"
+                   or (args.fail_on_error and bool(report.quarantined)))
     except (OSError, ValueError, csv.Error, RecursionError) as exc:
         parser.exit(2, f"flightops-quality: {exc}\n")

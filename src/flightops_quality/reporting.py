@@ -9,18 +9,21 @@ from typing import Any, Mapping, Optional
 from . import __version__
 from ._raw import snapshot_raw
 from .analytics import summarize
+from .gates import QualityPolicy, evaluate_quality
 from .models import BatchReport
 from .rules import flight_metrics
 
 RULESET_VERSION = "0.1.1"
 
 
-def audit_document(report: BatchReport, manifest: Optional[Mapping[str, Any]] = None) -> dict:
+def audit_document(report: BatchReport, manifest: Optional[Mapping[str, Any]] = None,
+                   *, quality_policy: Optional[QualityPolicy] = None) -> dict:
     document = report.to_dict()
     document["package_version"] = __version__
     document["ruleset_version"] = RULESET_VERSION
     document["manifest"] = dict(manifest or {})
     document["summary"] = summarize(report)
+    document["quality_gate"] = evaluate_quality(report, quality_policy)
     for category in ("accepted", "quarantined", "duplicates"):
         for entry, record in zip(document[category], getattr(report, category)):
             entry["raw"] = snapshot_raw(record.raw)
@@ -29,6 +32,26 @@ def audit_document(report: BatchReport, manifest: Optional[Mapping[str, Any]] = 
             entry["raw_sha256"] = hashlib.sha256(payload).hexdigest()
             entry["metrics"] = flight_metrics(record.flight) if record.accepted else None
     return document
+
+
+def _quality_gate_html(gate: Mapping[str, Any]) -> str:
+    status = str(gate.get("status", "not_configured"))
+    color = {"passed": "#146c43", "failed": "#a4262c"}.get(status, "#465465")
+    heading = (f'<h2>Batch quality gate</h2><p style="color:{color}">'
+               f'<strong>{escape(status.replace("_", " "))}</strong></p>')
+    checks = gate.get("checks", [])
+    if not checks:
+        return heading + '<p>No batch quality thresholds configured.</p>'
+    rows = []
+    for check in checks:
+        observed = "Unavailable" if check["observed"] is None else str(check["observed"])
+        threshold = f'{check["operator"]} {check["threshold"]}'
+        cells = (check["metric"], observed, threshold,
+                 "Pass" if check["passed"] else "Fail", check["reason"])
+        rows.append('<tr>' + ''.join(f'<td>{escape(str(c))}</td>' for c in cells) + '</tr>')
+    return (heading + '<table><thead><tr><th>Metric</th><th>Observed</th>'
+            '<th>Threshold</th><th>Result</th><th>Reason</th></tr></thead><tbody>'
+            + ''.join(rows) + '</tbody></table>')
 
 
 def render_html(document: Mapping[str, Any]) -> str:
@@ -59,6 +82,7 @@ def render_html(document: Mapping[str, Any]) -> str:
         'pre{white-space:pre-wrap;overflow-wrap:anywhere}summary{cursor:pointer}'
         '</style><h1>FlightOps Quality audit</h1>'
         '<p>Accepted records may have warnings. OTP uses only eligible accepted unique flights.</p>'
+        + _quality_gate_html(document.get("quality_gate", {})) +
         f'<h2>Summary</h2><pre>{summary}</pre><h2>Input manifest</h2><pre>{manifest}</pre>'
         '<h2>Record audit</h2><table><thead><tr><th>Disposition</th><th>Row</th>'
         '<th>Identity</th><th>Findings</th></tr></thead><tbody>'

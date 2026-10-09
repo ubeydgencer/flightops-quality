@@ -18,7 +18,7 @@ data quality, not operational certification.
 
 The BTS adapter handles a bounded subset of Reporting Carrier fields. It does
 not reconstruct diversion legs, gate-return history or every reporting rule.
-BTS covers US reporting data; it is not a THY or Turkish aviation dataset.
+BTS covers US reporting data.
 The directive establishes `2400` as midnight. This alpha requires callers to
 verify whether a scheduled midnight anchors the start or end of `FlightDate`
 for their release, rather than claiming that either date policy was validated.
@@ -31,7 +31,7 @@ points to [US government works](https://www.usa.gov/government-works); it does n
 label the dataset CC0. Users should check the actual source file and terms,
 including third-party content. This repository does not relicense external data.
 
-OpenSky is intentionally outside v0.1: its trajectory observations are not a
+OpenSky is outside the current adapter scope: its trajectory observations are not a
 schedule/delay/cancellation source, and operational use has separate terms.
 See its [FAQ](https://opensky-network.org/about/faq) and
 [terms](https://opensky-network.org/about/terms-of-use).
@@ -49,10 +49,3 @@ The field is populated. This package explores a narrower reusable interface:
 standard-informed operational timestamps, explicit uncertainty and derivation
 provenance, whole-group conflict quarantine and explainable metric populations.
 Its usefulness and demand still need user validation.
-
-## Portfolio relevance
-
-[Turkish Technology's public product list](https://turkishtechnology.com/tr/products)
-includes operational products such as Turnaround AI and tail assignment. That
-supports the choice of an aviation data project as a portfolio example; it does
-not prove an open role, adoption interest or compatibility with internal systems.

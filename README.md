@@ -8,10 +8,10 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.1.1](https://img.shields.io/badge/Release-0.1.1%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.1.1)
+[![Alpha 0.2.0](https://img.shields.io/badge/Release-0.2.0%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.0)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
-[Quickstart](#quickstart) · [Data contract](#data-contract) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/portfolio-tr.md)
+[Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
 
 </div>
 
@@ -32,6 +32,7 @@ between raw operational data and an analytics warehouse.
 | Repeated or conflicting records | Audit exact raw repeats; quarantine **every member** of a conflicting identity. |
 | Untraceable derived values | Retain raw snapshots, source hashes, row numbers and field-level derivation inputs. |
 | Misleading KPI populations | Publish OTP eligibility and exclusions alongside the percentage. |
+| Incomplete or heavily quarantined batches | Evaluate caller-chosen coverage, sample-size and quarantine thresholds before warehouse loading. |
 
 Existing airport databases, trajectory tools and schema validators address
 related needs. This project explores a narrower operational QA API;
@@ -84,6 +85,31 @@ Raw official airport/carrier IDs remain visible in the audit.
 On a system without an IANA database, install `python -m pip install '.[timezone]'`.
 Pin Python, the timezone database and the mapping to reproduce historical analysis.
 
+### Check a batch before warehouse loading
+
+Quality thresholds are optional. This stricter example deliberately **exits 1**
+and still writes the audit for review:
+
+```bash
+flightops-quality examples/synthetic_flights.csv --output example-output-gated \
+  --min-arrival-coverage-percent 80 \
+  --min-otp-eligible-flights 10 \
+  --max-quarantine-rate-percent 5
+```
+
+The synthetic batch has 66.67% arrival coverage (2 of 3 accepted normal flights),
+2 OTP-eligible flights and a 40% quarantine rate, so all three configured checks
+fail. Arrival coverage measures
+whether normal accepted flights have usable arrival-delay data; it is distinct
+from the demo's 50% OTP result. These thresholds govern **input quality**, not
+flight safety or an airline's on-time performance target.
+
+`audit.json` includes a `quality_gate` with the policy, measurements, checks and
+`passed` / `failed` / `not_configured` status. The SQLite example refuses a failed
+gate by default. After reviewing the findings, an explicit
+`--allow-failed-quality-gate` permits an exploratory load without changing the
+record dispositions or gate result. See [quality-gate policy and examples](docs/quality-gates.md).
+
 ## Data contract
 
 ```python
@@ -122,6 +148,26 @@ Invalid ISO offset minutes are rejected rather than normalized.
 known aircraft, matching connecting airport and actual gate times. It does not
 infer aircraft connections or impose a universal minimum turnaround.
 
+Use the same policy in a Python pipeline:
+
+```python
+from flightops_quality import QualityPolicy, evaluate_quality
+
+report = analyze_results([record])
+policy = QualityPolicy(
+    min_arrival_coverage_percent=100,
+    min_otp_eligible_flights=1,
+    max_quarantine_rate_percent=0,
+)
+gate = evaluate_quality(report, policy)
+document = audit_document(report, quality_policy=policy)
+assert document["quality_gate"]["status"] == "passed"
+```
+
+This reuses the complete single-record example above. Boundary values pass:
+minimum coverage/count checks use `>=`, and maximum quarantine rate uses `<=`.
+Without configured thresholds, the status is `not_configured`.
+
 ## Audit pipeline
 
 ```mermaid
@@ -132,7 +178,11 @@ flowchart LR
     D --> E[Accepted]
     D --> F[Quarantined]
     D --> G[Exact repeats]
-    E --> H[SQLite + route SQL]
+    E --> J{Quality gate}
+    F --> J
+    J -->|Passed or not configured| H[SQLite + route SQL]
+    J -->|Failed| K[Review findings]
+    J --> I
     E --> I[JSON / HTML / JSONL audit]
     F --> I
     G --> I
@@ -180,9 +230,16 @@ no network clients, command execution or mandatory runtime dependencies.
 [Security policy and private reporting](SECURITY.md) describe the trust boundary
 and review evidence. Checks do not guarantee the absence of vulnerabilities.
 
-CLI exits: **0** for a written report, **1** with `--fail-on-error` when records
-are quarantined, **2** for malformed files/configuration. Existing output folders
-are preserved; failed input validation creates no partial audit.
+CLI exits: **0** after a written report when no configured gate fails, **1** when
+a configured quality gate fails or `--fail-on-error` finds quarantined records,
+and **2** for malformed files/configuration, including invalid thresholds.
+Omitting threshold flags preserves the earlier behavior. A failed quality gate
+keeps its audit; invalid input or policy creates no partial audit. Existing output
+folders are preserved.
+
+On macOS/Linux, atomic directory publication uses exclusive-rename APIs. Windows
+uses Python's no-replacement rename behavior but has not been verified. Other
+unsupported platforms fail without publishing a partial audit.
 
 ## Development
 
@@ -200,9 +257,9 @@ and security checks. Hosted CI is currently blocked by GitHub integration
 permissions; [the reference workflow](docs/ci.yml) is ready, and no passing hosted
 CI badge is claimed.
 
-[Design and roadmap](docs/design.md) · [Rule catalog](docs/rules.md) ·
+[Design and roadmap](docs/design.md) · [Quality-gate policy](docs/quality-gates.md) · [Rule catalog](docs/rules.md) ·
 [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) ·
-[Turkish portfolio guide](docs/portfolio-tr.md)
+[Turkish usage guide](docs/guide-tr.md)
 
 The MIT license covers this project's code and original synthetic fixtures.
 Upstream data and specifications retain their own terms. The next useful step is

@@ -8,6 +8,14 @@ SELECT origin, destination,
                 THEN 1 ELSE 0 END) AS otp_eligible,
        SUM(CASE WHEN cancelled = 0 AND diverted = 0 AND arrival_delay_minutes < 15
                 THEN 1 ELSE 0 END) AS otp_on_time,
+       SUM(CASE WHEN cancelled = 0 AND diverted = 0 THEN 1 ELSE 0 END)
+           AS arrival_coverage_population,
+       SUM(CASE WHEN cancelled = 0 AND diverted = 0 AND arrival_delay_minutes IS NULL
+                THEN 1 ELSE 0 END) AS missing_arrival_delay,
+       100.0 * SUM(CASE WHEN cancelled = 0 AND diverted = 0 AND arrival_delay_minutes IS NOT NULL
+                        THEN 1 ELSE 0 END)
+       / NULLIF(SUM(CASE WHEN cancelled = 0 AND diverted = 0 THEN 1 ELSE 0 END), 0)
+           AS arrival_delay_coverage_percent,
        100.0 * SUM(CASE WHEN cancelled = 0 AND diverted = 0 AND arrival_delay_minutes < 15
                         THEN 1 ELSE 0 END)
        / NULLIF(SUM(CASE WHEN cancelled = 0 AND diverted = 0 AND arrival_delay_minutes IS NOT NULL
