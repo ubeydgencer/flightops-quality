@@ -71,6 +71,18 @@ removed. The filesystem must support hard links. Internal `audit_record_id`
 values link normalized flights to raw records; source `row_number` values are
 preserved as positions and need not be unique for API-produced audits.
 
+Warehouse input has separate bounds because audit JSON expands relative to its
+source CSV. The loader snapshots at most 128 MiB by default before JSON decoding,
+including trailing whitespace and any bytes added during reading. It accepts
+regular files, including symlinks to regular files; POSIX FIFOs fail without
+waiting for a writer. The combined accepted, quarantined and duplicate population
+is limited to 100,000 observations before digest checks or report reconstruction.
+Callers can change `max_audit_bytes` and `max_records` using positive, non-boolean
+integers up to `2**63 - 1`, or the matching CLI flags. Bounds are validated before
+output creation and apply even when a failed quality gate is overridden. Parsing
+and normalization still retain data in memory; these caps are not hard memory,
+CPU-time or concurrency limits.
+
 Loading first verifies every raw snapshot against its stored SHA-256 using the
 same sorted-key, compact UTF-8 JSON format as `audit_document`. Duplicate JSON
 object keys and inconsistent raw digests prevent database creation, including

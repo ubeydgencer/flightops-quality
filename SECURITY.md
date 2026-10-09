@@ -53,6 +53,15 @@ There is no guaranteed response deadline for this independently maintained proje
   private staged database and publishes without replacing an existing path only
   after inserts and the metric query succeed. A failed quality gate blocks
   loading unless the caller explicitly requests and records an override.
+- SQLite audit input defaults to 128 MiB of UTF-8 JSON bytes and 100,000 total
+  observations across accepted, quarantined and duplicate records. The byte
+  snapshot rejects oversized input, including trailing whitespace or growth
+  during reading, before JSON decoding. The observation count is bounded before
+  digest checks and report reconstruction. Only regular files are accepted;
+  symlinks to regular files are allowed, while POSIX FIFOs are rejected without
+  waiting for a writer. `max_audit_bytes` / `max_records` and their CLI flags
+  accept positive, non-boolean integers up to `2**63 - 1`. Invalid limits fail
+  before output creation; a failed-gate override cannot bypass these bounds.
 - Before creating a database, the SQLite example verifies every raw record's
   SHA-256 against its finite UTF-8 JSON snapshot using the producer's canonical
   serialization. Duplicate JSON object keys are rejected at every level. A
@@ -74,7 +83,10 @@ The CLI is a local batch tool, not an authenticated web service. Service wrapper
 must enforce their own request/concurrency limits, access control and retention.
 Direct API callers must also bound overall payload/record sizes; CLI caps are not
 an automatic limit on every library call. Existing report objects should be
-treated as read-only snapshots.
+treated as read-only snapshots. Audit JSON can expand substantially relative to
+source CSV. SQLite input limits are separate from the producer's CSV limits and
+may be raised explicitly for trusted batches. Parsing and normalization remain
+in memory; byte caps are not hard limits on memory use, CPU time or concurrency.
 
 ## Validation limits
 

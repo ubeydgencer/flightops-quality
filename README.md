@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.6](https://img.shields.io/badge/Release-0.2.6%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.6)
+[![Alpha 0.2.7](https://img.shields.io/badge/Release-0.2.7%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.7)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -271,17 +271,30 @@ published total-operations metric.
 
 ## Input boundaries and security
 
-| CLI boundary | Default |
+| Input boundary | Default |
 |---|---:|
 | CSV bytes | 50 MiB |
 | Records | 100,000 |
 | Records × columns | 2,000,000 cells |
 | Columns | 256 |
 | Timezone JSON | 1 MiB |
+| SQLite example: audit JSON bytes | 128 MiB |
+| SQLite example: all audit dispositions combined | 100,000 records |
 
 Raise `--max-input-mb`, `--max-records` or `--max-cells` deliberately for a trusted
 batch. Python's CSV field-size limit also applies. The tool keeps a batch in
 memory; it is not a distributed or streaming engine.
+
+The SQLite example accepts a regular UTF-8 audit file and checks its actual byte
+length before JSON parsing, including trailing whitespace and growth during
+reading. Its combined accepted, quarantined and duplicate count is checked
+before record verification. Oversized input creates no database; a failed-gate
+override cannot bypass the limits. Audit JSON includes normalized records and
+metadata, so its size differs from the source CSV. Raise `--max-audit-bytes` and
+`--max-records` explicitly for trusted warehouse inputs (Python keywords:
+`max_audit_bytes`, `max_records`). Both require positive integers up to `2**63 - 1`.
+The bounded document is still parsed in memory; byte limits are not a hard limit
+on process memory or concurrent work.
 
 Raw API input is a recursively copied, finite UTF-8 JSON tree with string keys,
 32-level nesting and 4096-bit integer limits. Cycles, unpaired surrogates,

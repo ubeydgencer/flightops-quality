@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flightops-quality"
-version = "0.2.6"
+version = "0.2.7"
 description = "Explainable flight operations data quality, timezone normalization, and batch audit reports"
 readme = "README.md"
 requires-python = ">=3.9"

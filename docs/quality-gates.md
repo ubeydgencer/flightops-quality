@@ -160,6 +160,21 @@ allow_failed_quality_gate=True)` for the same reviewed override; its default is
 refuses an existing destination. The example's `audit_metadata` table retains the
 quality-gate result and whether the failed-gate override was used.
 
+Warehouse input limits apply independently of quality-gate status. By default,
+the loader bounds the UTF-8 JSON snapshot to 128 MiB before decoding and the total
+accepted + quarantined + duplicate population to 100,000 observations before
+digest checks or reconstruction. Trailing whitespace and file growth count
+toward the byte limit. Input must be a regular file; symlinks to regular files
+are allowed, and POSIX FIFOs are rejected without waiting for a writer.
+
+For trusted larger audits, pass `max_audit_bytes=268435456, max_records=200000`
+to `load`, or `--max-audit-bytes 268435456 --max-records 200000` to the example CLI.
+These values allow 256 MiB and 200,000 observations. Limits must be positive,
+non-boolean integers up to `2**63 - 1`; invalid limits or exceeded bounds prevent
+output creation. The failed-gate override cannot bypass them. JSON parsing and
+normalization remain in memory, so these are not hard memory, CPU-time or
+concurrency limits.
+
 Before any database is created, all accepted, quarantined and duplicate raw
 records must match their stored SHA-256 digests. The loader uses the producer's
 canonical JSON serialization, so whitespace and object-key order do not affect

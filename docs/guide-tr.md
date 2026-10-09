@@ -137,6 +137,28 @@ tablosuna yükler. Ayrı SQL sorgusu uygun uçuş paydasını ve OTP'yi hesaplar
 python examples/etl_sqlite.py example-output/audit.json example-output/warehouse.db
 ```
 
+Yükleyici varsayılan olarak en fazla 128 MiB UTF-8 JSON baytı ve kabul, karantina,
+tekrar kategorilerinin toplamında 100.000 kayıt okur. JSON raporu kaynak CSV'den
+daha büyük olabileceği için bu sınırlar CSV sınırlarından ayrıdır. Güvendiğiniz
+daha büyük bir toplu iş için sınırları açıkça artırabilirsiniz:
+
+```bash
+python examples/etl_sqlite.py batch-output/audit.json batch-output/warehouse.db \
+  --max-audit-bytes 268435456 --max-records 200000
+```
+
+Bu örnek 256 MiB ve 200.000 kayıt sınırı koyar. Python `load` çağrısındaki
+karşılıkları `max_audit_bytes` ve `max_records` parametreleridir. Değerler
+`1`–`2**63 - 1` aralığında tam sayı olmalı; Python'da `bool` kabul edilmez.
+Girdi normal dosya olmalıdır; normal dosyaya işaret eden sembolik bağlantı
+kullanılabilir. POSIX FIFO girdileri bir yazıcı beklenmeden reddedilir.
+
+Bayt sınırı, sondaki boşluklar ve okuma sırasında büyüyen dosya dahil olmak üzere
+JSON çözümlemesinden önce uygulanır. Toplam kayıt sınırı hash doğrulamasından ve
+raporun yeniden kurulmasından önce kontrol edilir. Geçersiz sınır veya sınır aşımı
+veritabanı ve çıktı klasörü oluşturmaz. İşlem bellekte çalışır; bu sınırlar bellek
+kullanımı, CPU süresi veya eşzamanlı iş sayısı için kesin üst sınır sağlamaz.
+
 Kalite kapısı `failed` olan bir audit varsayılan olarak yüklenmez. Bulguların
 incelendiği bir keşif çalışmasında açık bir istisna kullanılabilir:
 
@@ -146,6 +168,7 @@ python examples/etl_sqlite.py quality-review/audit.json quality-review/reviewed.
 ```
 
 Bu seçenek kayıtları yeniden kabul etmez ve rapordaki kalite sonucunu değiştirmez.
+Girdi boyutu ve kayıt sınırlarını da geçersiz kılmaz.
 Python `load` fonksiyonunda aynı seçim `allow_failed_quality_gate=True` ile
 yapılır; varsayılanı `False` değeridir. Kalite kapısı bulunmayan eski auditler ve
 `not_configured` sonuçlar yüklenebilir. Yeni veritabanı yolu seçin; atomik dosya

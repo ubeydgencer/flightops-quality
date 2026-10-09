@@ -1,5 +1,38 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.7 bounded warehouse input
+
+- **220 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
+  Release verification also runs the suite against clean wheel installations
+  outside the checkout.
+- A valid empty audit with 2 MiB of manifest padding loaded successfully with
+  the previous example. The input size was independent of its zero record count.
+  The loader now checks a separate 128 MiB audit-byte limit and 100,000 combined
+  accepted, quarantined and duplicate observations by default.
+- Thirteen new regressions cover exact byte/record boundaries, Unicode bytes,
+  trailing whitespace, invalid API/CLI configuration, deliberate higher limits,
+  failed-gate overrides and malformed UTF-8. Excessive input fails before JSON
+  parsing or record verification, as appropriate, without changing the source
+  or creating the destination parent.
+- A stale file-size simulation checks the actual bounded read: at most one byte
+  beyond the configured limit is consumed, in chunks no larger than 64 KiB,
+  and JSON parsing is not reached. Regular-file symlinks work; directories,
+  devices and POSIX FIFOs fail. FIFO tests use a subprocess timeout and no writer.
+  An independent review also checked descriptor closure on rejected inputs.
+- The existing v0.2.5 November audit (16,933,129 bytes / 3,246 observations) loads
+  with the new defaults. It retains 3,245 accepted flights, one quarantine,
+  3,152 OTP-eligible flights and 2,393 on-time observations. Its original producer,
+  supplied summary and source bytes are preserved.
+- All three dated BTS JSON evidence files, the core API and row ruleset 0.1.1
+  are unchanged. No source row is normalized again during warehouse loading.
+
+The byte cap is separate from CSV input limits because audit output includes
+normalized records and metadata. Callers may raise both limits deliberately for
+trusted local batches. Parsing still holds the document in memory; these checks
+do not provide a hard process-memory, CPU or concurrency bound, authenticate the
+author or establish source ground truth. Verification is local; hosted GitHub
+Actions and PyPI publication remain unavailable with current access.
+
 ## v0.2.6 warehouse summary reconciliation
 
 - **207 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.

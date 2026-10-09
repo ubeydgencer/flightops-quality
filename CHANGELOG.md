@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.7 — 2026-10-09
+
+- The SQLite example now bounds audit input independently of the source CSV:
+  128 MiB of UTF-8 JSON bytes and 100,000 observations across all dispositions
+  by default. Byte checks include trailing whitespace and growth during reading;
+  record limits apply before hashing or normalized-flight reconstruction.
+- Trusted callers can raise `--max-audit-bytes` / `--max-records` or the matching
+  Python keywords deliberately. Limits must be positive non-boolean integers
+  up to `2**63 - 1`. Invalid or excessive input creates no destination database;
+  a failed-quality-gate override cannot bypass bounds.
+- Input must be a regular file. POSIX FIFOs fail without waiting for a writer;
+  symlinks to regular files remain supported. JSON parsing still happens in
+  memory, so these are input limits rather than a hard memory/concurrency cap.
+- The core API, row ruleset 0.1.1 and all three dated BTS JSON evidence files
+  remain unchanged.
+
 ## 0.2.6 — 2026-10-09
 
 - The SQLite example reconstructs and checks the recorded summary before

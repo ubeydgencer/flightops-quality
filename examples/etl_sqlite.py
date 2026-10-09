@@ -12,6 +12,7 @@ import json
 import math
 import os
 import sqlite3
+import stat
 import tempfile
 from pathlib import Path
 from datetime import date
@@ -22,6 +23,38 @@ from flightops_quality.gates import QualityPolicy, evaluate_quality
 from flightops_quality.models import BatchReport, FlightLeg, Issue, RecordResult
 from flightops_quality.rules import flight_metrics, validate_leg
 from flightops_quality.time import resolve_timestamp
+
+
+DEFAULT_MAX_AUDIT_BYTES = 128 * 1024 * 1024
+DEFAULT_MAX_RECORDS = 100_000
+
+
+def _validate_input_limit(value: int, name: str) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 2**63 - 1:
+        raise ValueError(f"{name} must be a positive integer no greater than 2**63 - 1")
+
+
+def _read_audit(path: Path, max_audit_bytes: int) -> str:
+    # Nonblocking open lets POSIX FIFOs fail the regular-file check without
+    # waiting for a writer. Validate the opened file, not an earlier path stat.
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NONBLOCK", 0))
+    try:
+        details = os.fstat(descriptor)
+        if not stat.S_ISREG(details.st_mode):
+            raise ValueError("Audit input must be a regular file")
+        if details.st_size > max_audit_bytes:
+            raise ValueError("Audit exceeds the configured byte limit")
+        payload = bytearray()
+        while True:
+            chunk = os.read(descriptor, min(64 * 1024, max_audit_bytes - len(payload) + 1))
+            if not chunk:
+                break
+            payload.extend(chunk)
+            if len(payload) > max_audit_bytes:
+                raise ValueError("Audit exceeds the configured byte limit")
+        return payload.decode("utf-8")
+    finally:
+        os.close(descriptor)
 
 
 def _audit_issues(record: dict) -> tuple[Issue, ...]:
@@ -153,7 +186,7 @@ def _quality_gate_status(audit: dict, allow_failed: bool, report: BatchReport) -
     return status, status == "failed" and allow_failed
 
 
-def _validate_counts(audit: dict) -> None:
+def _validate_counts(audit: dict, max_records: int) -> None:
     counts = audit.get("counts")
     categories = ("accepted", "quarantined", "duplicates")
     if not isinstance(counts, dict) or any(not isinstance(audit.get(c), list) for c in categories):
@@ -162,6 +195,8 @@ def _validate_counts(audit: dict) -> None:
     expected["input"] = sum(expected.values())
     if counts != expected or any(isinstance(v, bool) or not isinstance(v, int) for v in counts.values()):
         raise ValueError("Audit counts do not reconcile to the records")
+    if expected["input"] > max_records:
+        raise ValueError("Audit exceeds the configured record limit")
 
 
 def _reject_constant(value):
@@ -195,17 +230,21 @@ def _validate_raw_hashes(audit: dict) -> None:
                 raise ValueError("Audit raw_sha256 does not match its raw record")
 
 
-def load(audit_path: Path, database_path: Path, *, allow_failed_quality_gate: bool = False) -> dict:
+def load(audit_path: Path, database_path: Path, *, allow_failed_quality_gate: bool = False,
+         max_audit_bytes: int = DEFAULT_MAX_AUDIT_BYTES,
+         max_records: int = DEFAULT_MAX_RECORDS) -> dict:
+    _validate_input_limit(max_audit_bytes, "max_audit_bytes")
+    _validate_input_limit(max_records, "max_records")
     if os.path.lexists(database_path):
         raise ValueError("Choose a new database path to preserve the existing warehouse")
     try:
-        audit = json.loads(audit_path.read_text(encoding="utf-8"),
+        audit = json.loads(_read_audit(audit_path, max_audit_bytes),
                            parse_constant=_reject_constant, object_pairs_hook=_unique_json_object)
     except RecursionError as exc:
         raise ValueError("Audit JSON nesting exceeds the parser limit") from exc
     if not isinstance(audit, dict):
         raise ValueError("Audit must be a JSON object")
-    _validate_counts(audit)
+    _validate_counts(audit, max_records)
     _validate_raw_hashes(audit)
     report = _audit_report(audit)
     _validate_summary(audit, report)
@@ -300,11 +339,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("audit", type=Path)
     parser.add_argument("database", type=Path)
+    parser.add_argument("--max-audit-bytes", type=int, default=DEFAULT_MAX_AUDIT_BYTES,
+                        help="Maximum audit UTF-8 bytes (default: 128 MiB); raise deliberately for trusted batches")
+    parser.add_argument("--max-records", type=int, default=DEFAULT_MAX_RECORDS,
+                        help="Maximum total audit records across all dispositions (default: 100000)")
     parser.add_argument("--allow-failed-quality-gate", action="store_true",
                         help="Explicit manual override; the failed gate and override remain in warehouse metadata")
     args = parser.parse_args()
     try:
-        result = load(args.audit, args.database, allow_failed_quality_gate=args.allow_failed_quality_gate)
+        result = load(args.audit, args.database, allow_failed_quality_gate=args.allow_failed_quality_gate,
+                      max_audit_bytes=args.max_audit_bytes, max_records=args.max_records)
     except (ValueError, OSError, sqlite3.Error) as exc:
         parser.exit(2, f"etl_sqlite: {exc}\n")
     print(json.dumps(result, indent=2))
