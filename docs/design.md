@@ -71,6 +71,13 @@ removed. The filesystem must support hard links. Internal `audit_record_id`
 values link normalized flights to raw records; source `row_number` values are
 preserved as positions and need not be unique for API-produced audits.
 
+Loading first verifies every raw snapshot against its stored SHA-256 using the
+same sorted-key, compact UTF-8 JSON format as `audit_document`. Duplicate JSON
+object keys and inconsistent raw digests prevent database creation, including
+when a failed quality gate is explicitly overridden. This does not authenticate
+the audit author or check raw-to-normalized derivations again; the normalized
+timestamps are retained and stored KPIs are independently reconstructed.
+
 ## Limits and next steps
 
 v0.2 is a batch alpha, tested on synthetic edge cases. It has not been validated

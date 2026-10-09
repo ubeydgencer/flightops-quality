@@ -151,6 +151,14 @@ yapılır; varsayılanı `False` değeridir. Kalite kapısı bulunmayan eski aud
 `not_configured` sonuçlar yüklenebilir. Yeni veritabanı yolu seçin; atomik dosya
 yayımlama, hard link destekleyen bir dosya sistemi gerektirir.
 
+Yüklemeden önce kabul, karantina ve tekrar kategorilerindeki her ham kaydın
+SHA-256 değeri yeniden hesaplanır. Değişmiş bir gövde, eksik veya uyuşmayan hash
+ve JSON nesnelerinde tekrarlanan alan adları veritabanı oluşturulmadan reddedilir.
+Manuel kalite kapısı istisnası bu kontrolleri geçersiz kılamaz. JSON boşlukları ve
+nesne alanlarının sırası hash'i değiştirmez; ham kayıtlar yeniden normalize edilmez.
+Bu kontrol iç tutarlılığı doğrular; rapor sahibinin kimliğini veya özgün kaynak
+dosyayı doğrulamaz. Güvendiğiniz yerel veri akışının audit çıktısını kullanın.
+
 Python veri akışında `QualityPolicy` ve `evaluate_quality` doğrudan
 `flightops_quality` paketinden alınabilir. Aynı politikayı
 `audit_document(report, quality_policy=policy)` çağrısına vererek karar ve audit

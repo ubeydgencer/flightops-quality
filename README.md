@@ -8,7 +8,7 @@
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MIT license](https://img.shields.io/badge/License-MIT-64e6c2)](LICENSE)
-[![Alpha 0.2.4](https://img.shields.io/badge/Release-0.2.4%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.4)
+[![Alpha 0.2.5](https://img.shields.io/badge/Release-0.2.5%20alpha-153348)](https://github.com/ubeydgencer/flightops-quality/releases/tag/v0.2.5)
 [![Zero runtime dependencies](https://img.shields.io/badge/Runtime_dependencies-0-64e6c2)](pyproject.toml)
 
 [Quickstart](#quickstart) · [Data contract](#data-contract) · [Quality gates](docs/quality-gates.md) · [Rules](docs/rules.md) · [Security](SECURITY.md) · [Validation](docs/validation.md) · [Türkçe](docs/guide-tr.md)
@@ -158,6 +158,13 @@ flight safety or an airline's on-time performance target.
 gate by default. After reviewing the findings, an explicit
 `--allow-failed-quality-gate` permits an exploratory load without changing the
 record dispositions or gate result. See [quality-gate policy and examples](docs/quality-gates.md).
+
+Before loading, the SQLite example recomputes every accepted, quarantined and
+duplicate raw-record SHA-256 using the audit producer's canonical JSON format.
+Changed payloads, missing or inconsistent digests and duplicate JSON object keys
+are rejected before database creation; the failed-gate override cannot bypass
+these checks. This checks internal consistency, not the author's identity or
+the original source file. Use audits from your trusted local pipeline.
 
 ## Data contract
 

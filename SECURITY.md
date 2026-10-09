@@ -53,6 +53,13 @@ There is no guaranteed response deadline for this independently maintained proje
   private staged database and publishes without replacing an existing path only
   after inserts and the metric query succeed. A failed quality gate blocks
   loading unless the caller explicitly requests and records an override.
+- Before creating a database, the SQLite example verifies every raw record's
+  SHA-256 against its finite UTF-8 JSON snapshot using the producer's canonical
+  serialization. Duplicate JSON object keys are rejected at every level. A
+  manual failed-gate override cannot bypass these consistency checks. A digest
+  is not a signature: changing both the payload and its digest can still produce
+  consistent input. This does not authenticate the author, re-read the original
+  source file or re-normalize raw provider records.
 - Batch thresholds reject nonfinite percentages, boolean values and invalid
   counts. Policy and result are audit metadata, not signed authenticity evidence;
   the SQLite example expects an audit from a trusted local pipeline.

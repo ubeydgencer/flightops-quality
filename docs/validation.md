@@ -1,5 +1,37 @@
 # Versioned validation — 9 October 2026
 
+## v0.2.5 warehouse raw-record integrity
+
+- **199 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.
+  Release verification also runs the suite against clean wheel installations
+  outside the checkout.
+- An independent reproduction changed only an accepted raw body in a valid
+  passed-gate audit: the previous loader stored the changed body with its old
+  digest. Loading now recomputes the producer's canonical JSON SHA-256 for
+  accepted, quarantined and duplicate observations before creating a database.
+- Six new regressions cover changed nested payloads in every disposition,
+  missing/malformed/inconsistent digests, raw mapping/depth/integer/UTF-8 limits,
+  duplicate JSON keys at multiple levels, reordered JSON with Unicode lineage,
+  and CLI failures without traceback or output. Failed-gate overrides cannot
+  bypass these checks. Invalid inputs leave the audit bytes and destination
+  parent untouched; existing atomic-publication tests still pass.
+- The existing November extracted route-cohort CSV was audited and loaded:
+  3,246 raw observations, 3,245 accepted flights and one quarantined record.
+  Every database raw body/digest pair was independently rechecked. SQL retains
+  3,152 OTP-eligible flights and 2,393 on-time observations; foreign keys reconcile.
+  Here row numbers refer to the extracted CSV, not the original monthly CSV.
+- All three dated BTS JSON evidence files remain byte-for-byte unchanged.
+  The core API and row ruleset 0.1.1 are unchanged. No source row is normalized
+  again during warehouse loading.
+- Ruff and Bandit passed with no findings. Development dependencies are
+  unchanged; the same-day advisory evidence is reused only after checking
+  audited versions, with no new advisory scan or whole-package security claim.
+
+These checks detect internal inconsistency, not author authenticity or agreement
+with an unavailable original source file. The SQLite example continues to expect
+audits from a trusted local pipeline. Test results are local; hosted GitHub
+Actions and PyPI publication remain unavailable with current access.
+
 ## v0.2.4 autumn-transition source cohort
 
 - **193 unittest cases passed** on CPython 3.9.6 and 3.12.14 on macOS.

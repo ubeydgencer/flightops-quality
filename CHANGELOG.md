@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.5 — 2026-10-09
+
+- The SQLite example now recomputes each raw-record SHA-256 before creating a
+  database. Accepted, quarantined and duplicate observations must all match
+  the producer's canonical JSON snapshot; previously a changed raw body could
+  be stored alongside its old digest. A failed-quality-gate override cannot
+  bypass this integrity check.
+- Audit JSON rejects duplicate object keys at every level instead of silently
+  choosing the last value. Raw snapshots retain the producer's finite, UTF-8,
+  nesting and integer constraints. Invalid audits leave no final database.
+- Reformatting JSON or changing object-key order remains valid; source records
+  are not normalized again. Digests detect inconsistent contents, not author
+  authenticity or agreement with an unavailable original source file.
+- The core API, normalization rules, row ruleset 0.1.1 and all three recorded
+  monthly BTS JSON evidence files are unchanged.
+
 ## 0.2.4 — 2026-10-09
 
 - A third dated BTS benchmark covers November 2025 and the US autumn timezone

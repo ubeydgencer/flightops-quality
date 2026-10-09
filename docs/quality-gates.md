@@ -160,6 +160,18 @@ allow_failed_quality_gate=True)` for the same reviewed override; its default is
 refuses an existing destination. The example's `audit_metadata` table retains the
 quality-gate result and whether the failed-gate override was used.
 
+Before any database is created, all accepted, quarantined and duplicate raw
+records must match their stored SHA-256 digests. The loader uses the producer's
+canonical JSON serialization, so whitespace and object-key order do not affect
+the digest. Duplicate JSON object keys are rejected throughout the audit rather
+than choosing a value. These checks still apply with a manual failed-gate
+override and to legacy audits without a `quality_gate` field.
+
+This verifies internal raw-record consistency. It does not authenticate the
+audit author or compare against the original source file, and the loader does
+not re-normalize provider rows with a potentially different timezone database.
+Supply audits from your trusted local pipeline.
+
 See [the rule catalog](rules.md) for row findings, [design](design.md) for identity
 and provenance policies, and [validation](validation.md) for the limits of the
 synthetic evidence.

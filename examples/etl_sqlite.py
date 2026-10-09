@@ -7,6 +7,7 @@ Failed quality gates require an explicit manual override, retained in metadata.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -15,6 +16,7 @@ import tempfile
 from pathlib import Path
 from datetime import date
 
+from flightops_quality._raw import snapshot_raw
 from flightops_quality.gates import QualityPolicy, evaluate_quality
 from flightops_quality.models import BatchReport, FlightLeg, RecordResult
 from flightops_quality.rules import flight_metrics, validate_leg
@@ -127,13 +129,45 @@ def _reject_constant(value):
     raise ValueError(f"Audit contains a nonfinite JSON number: {value}")
 
 
+def _unique_json_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Audit contains a duplicate JSON object key")
+        result[key] = value
+    return result
+
+
+def _validate_raw_hashes(audit: dict) -> None:
+    """Check the producer's raw snapshot digest before creating a database.
+
+    This detects inconsistent audit contents; it is not author authentication.
+    Do not normalize source rows again or infer new timestamps during loading.
+    """
+    for category in ("accepted", "quarantined", "duplicates"):
+        for record in audit[category]:
+            if not isinstance(record, dict):
+                raise ValueError("Audit records must be JSON objects")
+            raw = snapshot_raw(record.get("raw"))
+            payload = json.dumps(raw, sort_keys=True, ensure_ascii=False,
+                                 separators=(",", ":"), allow_nan=False).encode("utf-8")
+            expected = hashlib.sha256(payload).hexdigest()
+            if record.get("raw_sha256") != expected:
+                raise ValueError("Audit raw_sha256 does not match its raw record")
+
+
 def load(audit_path: Path, database_path: Path, *, allow_failed_quality_gate: bool = False) -> dict:
     if os.path.lexists(database_path):
         raise ValueError("Choose a new database path to preserve the existing warehouse")
-    audit = json.loads(audit_path.read_text(encoding="utf-8"), parse_constant=_reject_constant)
+    try:
+        audit = json.loads(audit_path.read_text(encoding="utf-8"),
+                           parse_constant=_reject_constant, object_pairs_hook=_unique_json_object)
+    except RecursionError as exc:
+        raise ValueError("Audit JSON nesting exceeds the parser limit") from exc
     if not isinstance(audit, dict):
         raise ValueError("Audit must be a JSON object")
     _validate_counts(audit)
+    _validate_raw_hashes(audit)
     report = _audit_report(audit)
     gate_status, gate_override = _quality_gate_status(audit, allow_failed_quality_gate, report)
     query = Path(__file__).with_name("route_metrics.sql").read_text(encoding="utf-8")
