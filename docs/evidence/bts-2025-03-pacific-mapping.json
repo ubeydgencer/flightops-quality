@@ -1,0 +1,91 @@
+{
+  "checked_at": "2026-10-28",
+  "mapping_basis": "Project-curated inference from FAA airport identities/locations and IANA zone definitions; not an official IATA-to-IANA table.",
+  "sources": [
+    {
+      "url": "https://nfdc.faa.gov/webContent/28DaySub/extra/20_Feb_2025_APT_CSV.zip",
+      "sha256": "9fa7d26819c59d231ca34b4e9f4ac736032a0ded257c13535fe9b38bfdb10dfc",
+      "member": "APT_BASE.csv",
+      "airport_excerpts": [
+        {
+          "EFF_DATE": "2025/02/20",
+          "ARPT_ID": "PHX",
+          "SITE_NO": "00754.",
+          "ARPT_NAME": "PHOENIX SKY HARBOR INTL",
+          "CITY": "PHOENIX",
+          "STATE_CODE": "AZ",
+          "COUNTY_NAME": "MARICOPA",
+          "LAT_DECIMAL": "33.43427777",
+          "LONG_DECIMAL": "-112.01158333"
+        },
+        {
+          "EFF_DATE": "2025/02/20",
+          "ARPT_ID": "LAX",
+          "SITE_NO": "01818.",
+          "ARPT_NAME": "LOS ANGELES INTL",
+          "CITY": "LOS ANGELES",
+          "STATE_CODE": "CA",
+          "COUNTY_NAME": "LOS ANGELES",
+          "LAT_DECIMAL": "33.94249638",
+          "LONG_DECIMAL": "-118.40804861"
+        },
+        {
+          "EFF_DATE": "2025/02/20",
+          "ARPT_ID": "HNL",
+          "SITE_NO": "52161.",
+          "ARPT_NAME": "DANIEL K INOUYE INTL",
+          "CITY": "HONOLULU",
+          "STATE_CODE": "HI",
+          "COUNTY_NAME": "HONOLULU",
+          "LAT_DECIMAL": "21.31782472",
+          "LONG_DECIMAL": "-157.92025027"
+        }
+      ]
+    },
+    {
+      "url": "https://nfdc.faa.gov/webContent/28DaySub/extra/20_Mar_2025_APT_CSV.zip",
+      "sha256": "f108f95370d47de4ae60d543022222424f33427affc5b368a50fdf6a0e53a61d",
+      "member": "APT_BASE.csv",
+      "airport_excerpts": [
+        {
+          "EFF_DATE": "2025/03/20",
+          "ARPT_ID": "PHX",
+          "SITE_NO": "00754.",
+          "ARPT_NAME": "PHOENIX SKY HARBOR INTL",
+          "CITY": "PHOENIX",
+          "STATE_CODE": "AZ",
+          "COUNTY_NAME": "MARICOPA",
+          "LAT_DECIMAL": "33.43427777",
+          "LONG_DECIMAL": "-112.01158333"
+        },
+        {
+          "EFF_DATE": "2025/03/20",
+          "ARPT_ID": "LAX",
+          "SITE_NO": "01818.",
+          "ARPT_NAME": "LOS ANGELES INTL",
+          "CITY": "LOS ANGELES",
+          "STATE_CODE": "CA",
+          "COUNTY_NAME": "LOS ANGELES",
+          "LAT_DECIMAL": "33.94249638",
+          "LONG_DECIMAL": "-118.40804861"
+        },
+        {
+          "EFF_DATE": "2025/03/20",
+          "ARPT_ID": "HNL",
+          "SITE_NO": "52161.",
+          "ARPT_NAME": "DANIEL K INOUYE INTL",
+          "CITY": "HONOLULU",
+          "STATE_CODE": "HI",
+          "COUNTY_NAME": "HONOLULU",
+          "LAT_DECIMAL": "21.31782472",
+          "LONG_DECIMAL": "-157.92025027"
+        }
+      ]
+    },
+    {
+      "url": "https://data.iana.org/time-zones/tzdb-2025a/northamerica",
+      "sha256": "bb441456077da404a1997a50abfee95ac11937d9c28278cfe36f85277227c1f1",
+      "scope": "2025a zone rules: America/Phoenix, Pacific/Honolulu, America/Los_Angeles"
+    }
+  ]
+}

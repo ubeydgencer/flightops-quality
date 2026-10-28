@@ -1,0 +1,494 @@
+{
+  "schema_version": "1",
+  "source": {
+    "archive_name": "march.zip",
+    "archive_sha256": "9c80fbc2112cdbf3f0613ec2001ba019b3ad75511cd69657080736e7eda9cef4",
+    "archive_bytes": 30544825,
+    "csv_member": "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2025_3.csv",
+    "csv_sha256": "ba031a484a67f743869bc1284a09fa1de61cf35a6da010e87674a3dc128590d0",
+    "csv_bytes": 271623365,
+    "source_rows_scanned": 600872,
+    "columns": 110,
+    "source_date_range": {
+      "start": "2025-03-01",
+      "end": "2025-03-31"
+    },
+    "period": "2025-03",
+    "source_url_label": "https://transtats.bts.gov/PREZIP/On_Time_Reporting_Carrier_On_Time_Performance_1987_present_2025_3.zip"
+  },
+  "environment": {
+    "python": "3.9.6",
+    "system": "Darwin",
+    "package_version": "0.2.8",
+    "ruleset_version": "0.1.1",
+    "tzdata_package_version": "2025.1",
+    "tzdata_iana_version": "2025a",
+    "timezone_system_search_paths": [],
+    "timezone_note": "ZoneInfo uses system search paths first. Set PYTHONTZPATH='' and pin tzdata for replay."
+  },
+  "cohort": {
+    "airport_codes": [
+      "HNL",
+      "LAX",
+      "PHX"
+    ],
+    "airport_timezones": {
+      "HNL": "Pacific/Honolulu",
+      "LAX": "America/Los_Angeles",
+      "PHX": "America/Phoenix"
+    },
+    "timezone_mapping_sha256": "7fcaa20c8956000f0945e76ded0ddc01cc19d170947b66c0a0dbd8da5cfcd24d",
+    "predicate": "Origin and Dest both belong to the timezone mapping keys; all statuses retained.",
+    "truncated": false,
+    "full_cohort_bundled": false,
+    "diagnostic_source_excerpts": false
+  },
+  "limits": {
+    "archive_bytes": 67108864,
+    "csv_bytes": 536870912,
+    "source_rows": 1000000,
+    "cohort_rows": 20000,
+    "cohort_cells": 2000000,
+    "cohort_value_bytes": 67108864,
+    "columns": 256
+  },
+  "validation": {
+    "input_rows": 2578,
+    "batch_summary": {
+      "counts": {
+        "input": 2578,
+        "accepted": 2578,
+        "quarantined": 0,
+        "duplicates": 0
+      },
+      "issue_counts": {},
+      "accepted_population": {
+        "flights": 2578,
+        "cancelled": 2,
+        "diverted": 2,
+        "cancellation_rate_percent": 0.07757951900698215,
+        "diversion_rate_percent": 0.07757951900698215
+      },
+      "arrival_otp_15_completed": {
+        "eligible": 2574,
+        "coverage_population": 2574,
+        "coverage_percent": 100.0,
+        "on_time": 2189,
+        "late": 385,
+        "percent": 85.04273504273505,
+        "excluded_cancelled_or_diverted": 4,
+        "excluded_missing_arrival_delay": 0,
+        "policy": "Accepted unique, non-cancelled, non-diverted flights with valid arrival delay; delay < 15 minutes."
+      }
+    },
+    "group_dispositions": {
+      "input": 2578,
+      "accepted": 2578,
+      "quarantined": 0,
+      "duplicates": 0
+    },
+    "source_input_kpis": {
+      "all_source_rows": {
+        "input_rows": 2578,
+        "coverage_population": 2574,
+        "eligible": 2574,
+        "on_time": 2189,
+        "late": 385,
+        "percent": 85.04273504273505,
+        "coverage_percent": 100.0,
+        "excluded_counts": {
+          "cancelled_or_diverted": 4
+        }
+      },
+      "accepted_unique_rows": {
+        "input_rows": 2578,
+        "coverage_population": 2574,
+        "eligible": 2574,
+        "on_time": 2189,
+        "late": 385,
+        "percent": 85.04273504273505,
+        "coverage_percent": 100.0,
+        "excluded_counts": {
+          "cancelled_or_diverted": 4
+        }
+      },
+      "accepted_parity": {
+        "eligible": {
+          "source": 2574,
+          "derived": 2574,
+          "matched": true
+        },
+        "coverage_population": {
+          "source": 2574,
+          "derived": 2574,
+          "matched": true
+        },
+        "on_time": {
+          "source": 2189,
+          "derived": 2189,
+          "matched": true
+        },
+        "late": {
+          "source": 385,
+          "derived": 385,
+          "matched": true
+        },
+        "percent": {
+          "source": 85.04273504273505,
+          "derived": 85.04273504273505,
+          "matched": true
+        },
+        "coverage_percent": {
+          "source": 100.0,
+          "derived": 100.0,
+          "matched": true
+        }
+      },
+      "policy": "Original signed ArrDelay, strict delay < 15. All-source results count raw rows; accepted results use original batch dispositions. This is source-input accounting, not a held-out check."
+    },
+    "holdout_checks": {
+      "ArrDelay": {
+        "metric": "arrival_delay_minutes",
+        "checked": 2574,
+        "matched": 2574,
+        "mismatched": 0,
+        "excluded_counts": {
+          "cancelled": 2,
+          "diverted": 2
+        },
+        "mismatch_examples": [],
+        "input_rows": 2578,
+        "reconciled": true
+      },
+      "AirTime": {
+        "metric": "airborne_minutes",
+        "checked": 2574,
+        "matched": 2574,
+        "mismatched": 0,
+        "excluded_counts": {
+          "cancelled": 2,
+          "diverted": 2
+        },
+        "mismatch_examples": [],
+        "input_rows": 2578,
+        "reconciled": true
+      }
+    },
+    "timezone_offset_transitions": {
+      "policy": {
+        "population": "Original batch accepted unique flights only; quarantined rows and exact repeats are excluded.",
+        "scheduled": "Resolved sobt-to-sibt windows for every accepted unique flight, including cancellation and diversion.",
+        "actual": "Resolved aobt-to-aibt windows for noncancelled, nondiverted accepted unique flights only.",
+        "comparison": "Each unique origin/destination IANA zone is compared with itself at both UTC endpoints; airport zones are never compared to each other.",
+        "absolute_utc_validation": false,
+        "interpretation": "A derived endpoint UTC-offset difference is coverage evidence, not independent absolute UTC validation and not necessarily a DST change.",
+        "limitations": "Only the two endpoints are compared. Two compensating offset changes inside a window cannot be detected.",
+        "resolution": "Use already resolved aware instants; do not guess a local date, midnight policy or DST fold.",
+        "units": "offset_change_rows counts flight windows; zone_change_observations counts changed unique zones within those windows. Examples show at most ten windows per population."
+      },
+      "scheduled": {
+        "population_rows": 2578,
+        "checked": 2578,
+        "excluded_counts": {
+          "missing_timestamps": 0
+        },
+        "offset_change_rows": 4,
+        "zone_change_observations": 4,
+        "examples": [
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19805\",\"298\",\"12173\",\"12892\",1301]",
+            "source_row_number": 1119,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T07:41:00+00:00",
+            "window_end_utc": "2025-03-09T13:11:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-08T23:41:00-08:00",
+                "local_end": "2025-03-09T06:11:00-07:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19977\",\"1169\",\"12173\",\"12892\",1375]",
+            "source_row_number": 303881,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T08:55:00+00:00",
+            "window_end_utc": "2025-03-09T14:19:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-09T00:55:00-08:00",
+                "local_end": "2025-03-09T07:19:00-07:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19790\",\"658\",\"12173\",\"12892\",1319]",
+            "source_row_number": 462938,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T07:59:00+00:00",
+            "window_end_utc": "2025-03-09T13:19:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-08T23:59:00-08:00",
+                "local_end": "2025-03-09T06:19:00-07:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19690\",\"4\",\"12173\",\"12892\",1240]",
+            "source_row_number": 554398,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T06:40:00+00:00",
+            "window_end_utc": "2025-03-09T12:00:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-08T22:40:00-08:00",
+                "local_end": "2025-03-09T05:00:00-07:00"
+              }
+            ]
+          }
+        ],
+        "reconciled": true
+      },
+      "actual": {
+        "population_rows": 2574,
+        "checked": 2574,
+        "excluded_counts": {
+          "missing_timestamps": 0
+        },
+        "offset_change_rows": 4,
+        "zone_change_observations": 4,
+        "examples": [
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19805\",\"298\",\"12173\",\"12892\",1301]",
+            "source_row_number": 1119,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T07:44:00+00:00",
+            "window_end_utc": "2025-03-09T13:01:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-08T23:44:00-08:00",
+                "local_end": "2025-03-09T06:01:00-07:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19977\",\"1169\",\"12173\",\"12892\",1375]",
+            "source_row_number": 303881,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T08:47:00+00:00",
+            "window_end_utc": "2025-03-09T14:11:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-09T00:47:00-08:00",
+                "local_end": "2025-03-09T07:11:00-07:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19790\",\"658\",\"12173\",\"12892\",1319]",
+            "source_row_number": 462938,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T07:59:00+00:00",
+            "window_end_utc": "2025-03-09T13:21:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-08T23:59:00-08:00",
+                "local_end": "2025-03-09T06:21:00-07:00"
+              }
+            ]
+          },
+          {
+            "source": "bts",
+            "record_id": "[\"2025-03-08\",\"19690\",\"4\",\"12173\",\"12892\",1240]",
+            "source_row_number": 554398,
+            "service_date": "2025-03-08",
+            "origin": "HNL",
+            "destination": "LAX",
+            "route": "HNL-LAX",
+            "window_start_utc": "2025-03-09T06:36:00+00:00",
+            "window_end_utc": "2025-03-09T11:44:00+00:00",
+            "changes": [
+              {
+                "timezone": "America/Los_Angeles",
+                "offset_start_seconds": -28800,
+                "offset_end_seconds": -25200,
+                "change_seconds": 3600,
+                "local_start": "2025-03-08T22:36:00-08:00",
+                "local_end": "2025-03-09T04:44:00-07:00"
+              }
+            ]
+          }
+        ],
+        "reconciled": true
+      }
+    },
+    "source_status_counts": {
+      "Cancelled": {
+        "0": 2576,
+        "1": 2,
+        "invalid": 0
+      },
+      "Diverted": {
+        "0": 2576,
+        "1": 2,
+        "invalid": 0
+      },
+      "cohorts": {
+        "normal": 2574,
+        "cancelled_only": 2,
+        "diverted_only": 2,
+        "cancelled_and_diverted": 0,
+        "invalid_status": 0
+      }
+    },
+    "normalizer_issue_counts": {},
+    "normalizer_issue_examples": [],
+    "unresolved_counts": {},
+    "source_missing_fields": {
+      "ActualElapsedTime": 4,
+      "AirTime": 4,
+      "ArrDelay": 4,
+      "ArrTime": 2,
+      "DepDelay": 2,
+      "DepTime": 2,
+      "TaxiIn": 2,
+      "TaxiOut": 2,
+      "WheelsOff": 2,
+      "WheelsOn": 2
+    },
+    "route_counts": {
+      "HNL-LAX": 454,
+      "HNL-PHX": 150,
+      "LAX-HNL": 456,
+      "LAX-PHX": 684,
+      "PHX-HNL": 150,
+      "PHX-LAX": 684
+    },
+    "date_range": {
+      "start": "2025-03-01",
+      "end": "2025-03-31",
+      "valid_rows": 2578,
+      "invalid_rows": 0
+    },
+    "airport_ids": {
+      "HNL": {
+        "airport_ids": [
+          "12173"
+        ],
+        "airport_sequence_ids": [
+          "1217305"
+        ],
+        "observations": {
+          "Dest": 606,
+          "Origin": 604
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      },
+      "LAX": {
+        "airport_ids": [
+          "12892"
+        ],
+        "airport_sequence_ids": [
+          "1289208"
+        ],
+        "observations": {
+          "Dest": 1138,
+          "Origin": 1140
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      },
+      "PHX": {
+        "airport_ids": [
+          "14107"
+        ],
+        "airport_sequence_ids": [
+          "1410702"
+        ],
+        "observations": {
+          "Dest": 834,
+          "Origin": 834
+        },
+        "missing_field_counts": {},
+        "invalid_field_counts": {}
+      }
+    },
+    "policy": {
+      "scope": "Every caller-supplied source row; no sampling or status selection in this helper.",
+      "holdouts": "ArrDelay and AirTime are withheld only in a separate probe; original rows determine batch dispositions.",
+      "tolerance_minutes": 0,
+      "midnight_policy": null,
+      "departure_fold": null,
+      "absolute_utc_validation": false,
+      "duplicate_policy": "Hold-outs account for every source row; batch KPIs use original accepted unique flights.",
+      "missing_policy": "Never derive dates or durations from clock order; source-clock absence is reported separately.",
+      "reconstruction_checks": "Input-derived DepDelay, ActualElapsedTime and taxi KPI equalities are not claimed as independent hold-outs.",
+      "issue_count_unit": "Source rows containing a code, before batch duplicate/conflict findings.",
+      "exclusion_priority": "invalid/cancelled/diverted status, missing/invalid target, probe error, missing prediction."
+    }
+  },
+  "cohort_artifact": {
+    "name": "cohort.csv",
+    "sha256": "661cfb285b778881da15bcdc704a5918fc176b81d4589aabf8bd2f084e9cf15e",
+    "source_line_field": "_source_line_number",
+    "note": "Added source line metadata is excluded from normalization and duplicate fingerprints."
+  }
+}

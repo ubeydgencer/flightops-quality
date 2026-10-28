@@ -88,7 +88,9 @@ Pin Python, the timezone database and the mapping to reproduce historical analys
 ### Dated real-source validation
 
 Offline benchmarks select every January, March or November 2025 BTS source row whose
-origin and destination are both JFK, LAX or ORD, retaining all statuses. They
+origin and destination are both JFK, LAX or ORD. An additional March cohort uses
+HNL, LAX and PHX, adding Honolulu and Phoenix and their non-DST timezones.
+All cohorts retain all statuses. They
 preserve source fields and positions, check archive SHA-256 hashes and separate
 source-input KPI parity from held-out reconstruction of arrival delay and
 airborne time.
@@ -98,6 +100,12 @@ airborne time.
 | [January 2025](docs/bts-2025-01-route-cohort.md) | 2,929 | 2,928 | 1 | 2,909 |
 | [March 2025](docs/bts-2025-03-route-cohort.md) | 3,079 | 3,079 | 0 | 3,061 |
 | [November 2025](docs/bts-2025-11-route-cohort.md) | 3,246 | 3,245 | 1 | 3,152 |
+| [March 2025 · HNL/LAX/PHX](docs/bts-2025-03-pacific-cohort.md) | 2,578 | 2,578 | 0 | 2,574 |
+
+The Pacific cohort excludes two cancellations and two diversions from each
+held-out comparison; it has no duplicate or quarantined rows. Its
+[committed HTML report](docs/evidence/bts-2025-03-pacific-report.html) can be
+downloaded and opened offline.
 
 Both held-out fields match on every comparable row in these runs; cancellations,
 diversions, January's clock finding and November's unresolved repeated-hour
